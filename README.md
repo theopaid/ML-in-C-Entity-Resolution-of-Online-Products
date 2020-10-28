@@ -6,4 +6,4 @@
 	Θεοδόσης Παιδάκης   - sdi1500118
 
 
-==Use 'make' for insturctions==
+Use `make` for instructions.
