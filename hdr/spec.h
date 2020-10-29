@@ -11,10 +11,10 @@ typedef struct InfoList {
   InfoNode *head;
 };
 
-typedef struct Specs {
-  char *spec_id;
-  char *page_title;
-  InfoList *info_list;
-} Spec;
+typedef struct SpecInfo {
+  char *specId;
+  char *pageTitle;
+  InfoList *infoList;
+};
 
 #endif
