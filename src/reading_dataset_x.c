@@ -8,7 +8,7 @@ void read_from_file(char *file_name) {
     perror("Unable to open dataset_x file!");
     exit(1);
   } else {
-    if ( fgets(line, 1000, dataset_x) != NULL ) {
+    while ( fgets(line, 1000, dataset_x) != NULL ) {
       puts(line);
     }
     fclose(dataset_x);

@@ -1,6 +1,6 @@
 #ifndef _INCLUDES_H
 #define _INCLUDES_H
-#define DATASETX "../test_files/test.txt"
+#define DATASETX "./test_files/test.txt"
 
 #include <stdio.h>
 #include <stdlib.h>
