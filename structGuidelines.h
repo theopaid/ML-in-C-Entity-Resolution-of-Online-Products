@@ -1,14 +1,14 @@
 
-HashItem *hashArray[n_buckets];
+HashBucket *hashArray[n_buckets];
 
-typedef struct HashItem
+typedef struct HashBucket
 {
-    SpecNode *specPtr;
+    SpecNode *specList;
 };
 
 typedef struct SpecNode
 {
-    CliqueNode *headOfClique;
+    CliqueNode *cliquePtr;
     SpecNode *nextSpec; // Θα δείχνει στο επόμενο spec, στην περίπτωση που το hashFunction μας δείξει στο ίδιο bucket.
 };
 
@@ -21,14 +21,21 @@ typedef struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα
 typedef struct SpecInfo
 {
     char  *specId;
-    DscrNode *infoList;
+    char *pageTitle;
+    InfoList *infoList;
 };
 
-typedef struct DscrNode // Περιέχει την περιγραφή (descirption) του spec.
+typedef struct InfoList
+{
+    InfoNode *head;
+};
+
+
+typedef struct InfoNode // Περιέχει την περιγραφή (descirption) του spec.
 {                       // Σε μορφή λίστας θα αποθηκεύονται.
-    char *key;          
-    char *value;        // key:value αντιστοίχιση των γραμμών του .json
-    DscrNode *next;
+    char *descirption;          
+    char *content;        // description:content αντιστοίχιση των γραμμών του .json
+    InfoNode *next;
 };
 
 
