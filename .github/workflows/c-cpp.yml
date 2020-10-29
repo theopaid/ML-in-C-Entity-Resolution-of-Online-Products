@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install valgrind
+    - run: sudo apt install -y valgrind
     - name: test
       run: make memcheck
