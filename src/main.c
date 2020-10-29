@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-#include "initial.h"
+#include "../hdr/includes.h"
 
 int main(int argc, char **argv)
 {
