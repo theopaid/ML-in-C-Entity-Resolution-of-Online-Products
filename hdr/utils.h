@@ -5,4 +5,6 @@
 
 void *safe_malloc(size_t size);
 
+void *safe_calloc(long elementsNum, size_t objectSize);
+
 #endif

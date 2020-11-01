@@ -17,8 +17,16 @@ struct SpecNode
     SpecNode *nextSpec;
 };
 
+SpecNode *initSpecNode();
+
 HashBucket **initHashTable(int);
 
+int hashFunction(char *);
+
 void addToHashTable(HashBucket **, SpecInfo *);
+
+void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode);
+
+HashBucket *searchHashTable(HashBucket **hashTable, char *specId);
 
 #endif

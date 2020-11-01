@@ -11,4 +11,6 @@ struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα. Αρχ
     CliqueNode *next;
 };
 
+CliqueNode *initCliqueNode();
+
 #endif
