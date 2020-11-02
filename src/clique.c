@@ -8,3 +8,7 @@ CliqueNode *initCliqueNode()
 
     return newCliqueNode;
 }
+
+void updateCliques(char *leftSpecId, char *rightSpecId)
+{
+}

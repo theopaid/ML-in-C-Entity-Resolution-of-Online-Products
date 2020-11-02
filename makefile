@@ -3,15 +3,15 @@
 PROGRAM_NAME = main
 
 # Compilation flags
-CFLAGS  = -std=c99
+CFLAGS  = -std=gnu99
 CFLAGS += -g
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -pedantic
-CFLAGS += -Werror
+#CFLAGS += -Werror
 
 # Test flags
-TEST_FLAGS  = -std=c99
+TEST_FLAGS  = -std=gnu99
 TEST_FLAGS += -Wall
 TEST_FLAGS += -I./test
 

@@ -13,4 +13,6 @@ struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα. Αρχ
 
 CliqueNode *initCliqueNode();
 
+void updateCliques(char *leftSpecId, char *rightSpecId);
+
 #endif
