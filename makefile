@@ -83,5 +83,3 @@ t: test
 
 build/test: $(TESTS) build
 	$(CC) $(CFLAGS) $(TESTS) $(SOURCE) $(UNITY) -o build/test
-
-

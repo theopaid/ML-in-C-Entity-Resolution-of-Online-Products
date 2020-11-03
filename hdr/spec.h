@@ -12,6 +12,9 @@ struct SpecInfo
   InfoList *infoList;
 };
 
+SpecInfo* initSpecInfo(char *, char*);
+void unitSpecInfo(SpecInfo *);
+
 struct InfoList
 {
   InfoNode *head;
@@ -23,5 +26,6 @@ struct InfoNode // Περιέχει την περιγραφή (descirption) το
   char *content; // description:content αντιστοίχιση των γραμμών του .json
   InfoNode *next;
 };
+
 
 #endif
