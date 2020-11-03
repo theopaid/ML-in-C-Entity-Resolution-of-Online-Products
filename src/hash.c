@@ -6,9 +6,10 @@ HashBucket **initHashTable(int specSum)
 {
     int bucketsToAlloc = specSum / 0.7; // we need a load factor of at least 70%, to minimize collisions
     HashBucket **newHashTable = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
+
     for (int i = 0; i < bucketsToAlloc; i++)
     {
-        newHashTable[i]->specList = NULL;
+        newHashTable[i] = NULL;
     }
     hashTableSize = bucketsToAlloc;
 
