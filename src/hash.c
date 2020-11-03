@@ -9,7 +9,8 @@ HashBucket **initHashTable(int specSum)
 
     for (int i = 0; i < bucketsToAlloc; i++)
     {
-        newHashTable[i] = NULL;
+        newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
+        newHashTable[i]->specList = NULL;
     }
     hashTableSize = bucketsToAlloc;
 
