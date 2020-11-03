@@ -3,7 +3,7 @@
 PROGRAM_NAME = main
 
 # Compilation flags
-CFLAGS  = -std=c99
+CFLAGS  = -std=gnu99
 CFLAGS += -g
 CFLAGS += -Wall
 CFLAGS += -Wextra
@@ -79,5 +79,3 @@ t: test
 
 build/test: $(TESTS) build
 	$(CC) $(CFLAGS) $(TESTS) $(SOURCE) $(UNITY) -o build/test
-
-

@@ -17,4 +17,7 @@ typedef struct SpecInfo {
   InfoList *infoList;
 };
 
+SpecInfo* initSpecInfo(char *, char*);
+void unitSpecInfo(SpecInfo *);
+
 #endif
