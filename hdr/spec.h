@@ -1,17 +1,12 @@
 #ifndef _SPEC_H
 #define _SPEC_H
 
-typedef struct InfoNodes {
-  char *description;
-  char *content;
-  struct InfoNodes *next;
-} InfoNode;
+typedef struct SpecInfo SpecInfo;
+typedef struct InfoList InfoList;
+typedef struct InfoNode InfoNode;
 
-typedef struct InfoList {
-  InfoNode *head;
-};
-
-typedef struct SpecInfo {
+struct SpecInfo
+{
   char *specId;
   char *pageTitle;
   InfoList *infoList;
@@ -19,5 +14,18 @@ typedef struct SpecInfo {
 
 SpecInfo* initSpecInfo(char *, char*);
 void unitSpecInfo(SpecInfo *);
+
+struct InfoList
+{
+  InfoNode *head;
+};
+
+struct InfoNode // Περιέχει την περιγραφή (descirption) του spec.
+{               // Σε μορφή λίστας θα αποθηκεύονται.
+  char *descirption;
+  char *content; // description:content αντιστοίχιση των γραμμών του .json
+  InfoNode *next;
+};
+
 
 #endif

@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include "Unity/src/unity.h"
 
-#include "../src/initial.h"
+#include "../hdr/includes.h"
 
 void setUp(void)
 {
@@ -29,6 +29,8 @@ int main(void)
    UnityBegin("test/test_initial.c");
 
    RUN_TEST(test_hello);
+   //initHashTable(29000);
+   //initCliqueNode();
 
    UnityEnd();
 
