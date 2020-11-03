@@ -1,6 +1,8 @@
 # This makefile builds and manages the project.
 
 PROGRAM_NAME = main
+DATASET_X = ../Datasets/2013_camera_specs
+DATASET_W = ../Datasets/sigmod_medium_labelled_dataset.csv
 
 # Compilation flags
 CFLAGS  = -std=gnu99
@@ -32,7 +34,7 @@ usage:
 	@echo "c|lean      Remove any temporary products"
 	@echo "cl|obber    Remove any generated files"
 	@echo "m|emcheck   Check for memory leaks"
-	@echo "r|un        Run 'build', then run the resulting executable"
+	@echo "r|un        Run 'build', then run the resulting executable with default arguments"
 	@echo "t|est       Run the unit tests"
 
 .PHONY: memcheck
@@ -50,6 +52,8 @@ m: memcheck
 build: $(SOURCE)
 	mkdir -p build
 	$(CC) $(CC_FLAGS) $(SOURCE) $(MAIN) -o ./build/$(PROGRAM_NAME)
+	@echo " "
+	@echo "---- Run: ./build/main -x [dataset X folder] -w [dataset W file.csv] ----"
 .PHONY: b
 b: build
 
@@ -67,7 +71,7 @@ cl: clobber
 
 .PHONY: run
 run: clean build
-	./build/$(PROGRAM_NAME)
+	./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
 .PHONY: r
 r: run
 

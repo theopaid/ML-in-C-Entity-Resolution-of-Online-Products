@@ -21,6 +21,8 @@ int main(void)
    UnityBegin("test/test_initial.c");
 
    RUN_TEST(test_hello);
+   //initHashTable(29000);
+   //initCliqueNode();
 
    UnityEnd();
 
