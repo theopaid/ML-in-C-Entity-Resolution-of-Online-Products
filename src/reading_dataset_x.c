@@ -75,10 +75,10 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
               SpecInfo *new_spec = initSpecInfo("new", "spec");
 
               if ( fgets(line, 1000, dataset_x) != NULL ) {
-                puts(line);
+                printf("%s", line);
               }
 
-              addToHashTable(hash_table, new_spec);
+              //addToHashTable(hash_table, new_spec);
 
               fclose(dataset_x);
             }

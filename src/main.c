@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 
   //HashBucket **hashTable = initHashTable(count_datafiles(DATASET_PATH));
 
-  HashBucket **hashTable = initHashTable(10);
+  HashBucket **hashTable = initHashTable(count_datafiles(DATASET_PATH));
 
   read_from_dir(DATASET_PATH, hashTable);
 
