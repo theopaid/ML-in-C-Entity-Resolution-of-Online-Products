@@ -12,7 +12,7 @@ struct SpecInfo
   InfoList *infoList;
 };
 
-SpecInfo* initSpecInfo(char *, char*);
+SpecInfo *initSpecInfo(char *, char *);
 void unitSpecInfo(SpecInfo *);
 
 struct InfoList
@@ -27,5 +27,10 @@ struct InfoNode // Περιέχει την περιγραφή (descirption) το
   InfoNode *next;
 };
 
+void freeInfoNode(InfoNode *infoNode);
+
+void freeInfoList(InfoList *infoList);
+
+void freeSpecInfo(SpecInfo *specInfo);
 
 #endif

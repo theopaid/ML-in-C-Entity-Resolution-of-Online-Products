@@ -22,7 +22,8 @@ void test_init(void)
    TEST_ASSERT_NOT_NULL(test_spec);
    TEST_ASSERT_EQUAL_STRING("test_1", test_spec->specId);
    TEST_ASSERT_EQUAL_STRING("test_2", test_spec->pageTitle);
-   unitSpecInfo(test_spec);
+   //unitSpecInfo(test_spec);
+   freeSpecInfo(test_spec);
 }
 
 int main(void)
@@ -30,8 +31,8 @@ int main(void)
    UnityBegin("test/test_initial.c");
 
    RUN_TEST(test_hello);
-   //initHashTable(29000);
-   //initCliqueNode();
+   //freeHashTable(initHashTable(29000));
+   //freeCliqueNode(initCliqueNode());
 
    UnityEnd();
 
