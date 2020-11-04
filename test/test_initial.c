@@ -33,6 +33,7 @@ int main(void)
    RUN_TEST(test_hello);
    //freeHashTable(initHashTable(29000));
    //freeCliqueNode(initCliqueNode());
+   readDictionary("Datasets/sigmod_medium_labelled_dataset.csv");
 
    UnityEnd();
 
