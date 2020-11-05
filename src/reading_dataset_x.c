@@ -124,7 +124,7 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
                     if (pageTitle != NULL)
                     {
                       //printf("%s\n", pageTitle);
-                      new_spec = initSpecInfo(sites_folder->d_name, pageTitle);
+                      new_spec = initSpecInfo(sites_folder->d_name, specs_folder->d_name, pageTitle);
                       continue;
                     }
                   }
