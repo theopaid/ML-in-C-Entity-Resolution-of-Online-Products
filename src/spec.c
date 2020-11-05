@@ -23,7 +23,7 @@ void freeInfoNode(InfoNode *infoNode)
 {
     if (infoNode == NULL)
         return;
-    free(infoNode->desciption);
+    free(infoNode->description);
     free(infoNode->content);
     freeInfoNode(infoNode->next);
     free(infoNode);
