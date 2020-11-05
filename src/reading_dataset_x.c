@@ -57,7 +57,7 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
           if ( strcmp(specs_folder->d_name, ".") != 0 && strcmp(specs_folder->d_name, "..") != 0 ) {
             //printf("%s\n", specs_folder->d_name); // json files
             FILE *dataset_x;
-            char line[1000];
+            char line[10000];
             char *spec_path;
 
             // Open the spec file
@@ -72,14 +72,82 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
               exit(1);
             } else {
               // Time to read the spec
-              SpecInfo *new_spec = initSpecInfo("new", "spec");
+              SpecInfo *new_spec;
+              const char s[2] = "\"";
+              char *description;
 
-              if ( fgets(line, 1000, dataset_x) != NULL ) {
-                puts(line);
+              if ( fgets(line, 10000, dataset_x) == NULL ) {
+                perror("Unable to read data.");
+                exit(1);
               }
+              if ( strcmp(line, "{\n") != 0 ) {
+                //printf("%s", line);
+                // Incorrect spec definition
+                fclose(dataset_x);
+                free(spec_path);
+                continue;
+              }
+              while ( fgets(line, 10000, dataset_x) != NULL ) {
+                if ( strcmp(line, "}") == 0 ) {
+                  continue;
+                }
+                //printf("%s", line);
 
-              addToHashTable(hash_table, new_spec);
+                strtok(line, s);
+                description = strtok(NULL, s);
+                if ( description != NULL ) {
+                  //printf("%s\n", description);
+                  if ( strcmp(description, "<page title>") == 0 ) {
+                    char *pageTitle;
+                    strtok(NULL, s);
+                    pageTitle = strtok(NULL, s);
+                    //pageTitle = strtok(pageTitle, "|-,"); // If we wanted to strip the title and keep only the "usefull" info
+                    if ( pageTitle != NULL ) {
+                      //printf("%s\n", pageTitle);
+                      new_spec = initSpecInfo(sites_folder->d_name, pageTitle);
+                      continue;
+                    }
+                  } else {
+                    // The attribute is not page title, but a new one
+                    // description -> name, content -> info
+                    char *option;
+                    char *content;
+                    option = strtok(NULL, "\":");
+                    if ( option != NULL ) {
+                      if ( strcmp(option, " [\n") == 0 ) {
+                        //printf("%s\n", option);
+                        // Parse option List
+                        char option_line[10000];
+                        while ( fgets(option_line, 10000, dataset_x) != NULL ) {
+                          //puts(option_line);
+                          strtok(option_line, s);
+                          content = strtok(NULL, s);
+                          if ( content != NULL ) {
+                            //printf("%s: %s\n", description, content);
+                            add_newInfo_toSpec(new_spec, description, content);
+                          }
+                          content = strtok(NULL, s);
+                          if ( content !=  NULL ) {
+                            //printf("%s", content);
+                            if ( strcmp(content, ",\n") != 0) {
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    }
+                    // Parse simple info
+                    content = strtok(NULL, s);
+                    if  ( content != NULL ) {
+                      //printf("%s: %s\n", description, content);
+                      add_newInfo_toSpec(new_spec, description, content);
+                    }
+                  }
+                }
+              }
+              print_spec(new_spec);
 
+              //addToHashTable(hash_table, new_spec);
               fclose(dataset_x);
             }
             free(spec_path);
