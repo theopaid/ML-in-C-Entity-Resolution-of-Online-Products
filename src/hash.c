@@ -1,62 +1,80 @@
 #include "../hdr/includes.h"
 
-int hashTableSize;
-
-HashBucket **initHashTable(int specSum)
+HashTable *initHashTable(int specSum)
 {
     int bucketsToAlloc = specSum / 0.7; // we need a load factor of at least 70%, to minimize collisions
-    HashBucket **newHashTable = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
+    //HashBucket **newHashTable = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
+    HashTable *hashTable = (HashTable *)safe_malloc(sizeof(HashTable));
+    hashTable->size = bucketsToAlloc;
+    hashTable->hashArray = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
 
     for (int i = 0; i < bucketsToAlloc; i++)
     {
-        newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
-        newHashTable[i]->specList = NULL;
+        hashTable->hashArray[i] = NULL;
+        //newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
+        //newHashTable[i]->specList = NULL;
     }
-    hashTableSize = bucketsToAlloc;
-
-    return newHashTable;
+    printf("table size init: %ld\n", hashTable->size);
+    return hashTable;
 }
 
 // Java's java.lang.String hashCode() method
-int hashFunction(char *specId)
+unsigned long long hashFunction(char *specId)
 {
-    int h = 0;
-    int offset = 0;
-    int len = strlen(specId);
+    unsigned long long h = 0;
+    //int offset = 0;
+    long len = strlen(specId);
+    //char val[] = specId;
     for (int i = 0; i < len; i++)
     {
-        h = 31 * h + specId[offset++];
+        //printf("h: %llu, specid: %d\n", h, specId[i]);
+        h = 31 * h + specId[i];
     }
 
     return h;
 }
 
-void addToHashTable(HashBucket **hashTable, SpecInfo *specToAdd)
+void addToHashTable(HashTable *hashTable, SpecInfo *specToAdd)
 {
     // call hash function, allocate specnode and cliqueNode and store them in hashArray
-    int hash = hashFunction(specToAdd->specId);
-    int posInHashTable = hash % hashTableSize;
+    unsigned long long hash = hashFunction(specToAdd->specId);
+    printf("hash: %llu, size: %ld\n", hash, hashTable->size);
+    long posInHashTable = hash % hashTable->size;
     SpecNode *newSpecNode = initSpecNode();
     CliqueNode *newCliqueNode = initCliqueNode();
 
     newCliqueNode->specInfo = specToAdd;
     newSpecNode->cliquePtr = newCliqueNode;
-    insertInChain(hashTable[posInHashTable], newSpecNode);
+    printf("Inserting in pos: %ld\n", posInHashTable);
+    if (hashTable->hashArray[posInHashTable] == NULL)
+    {
+        hashTable->hashArray[posInHashTable] = (HashBucket *)safe_malloc(sizeof(HashBucket));
+        hashTable->hashArray[posInHashTable]->specList = NULL;
+    }
+    insertInChain(hashTable->hashArray[posInHashTable], newSpecNode);
 }
 
 void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode)
 {
+    //puts("HERE ");
+    //puts(" ");
     if (bucketDst->specList == NULL)
     {
+        //puts("HERE 1");
+        //puts(" ");
         bucketDst->specList = newSpecNode;
         return;
     }
+    //puts("HERE 1.5");
     SpecNode *dstPtr = bucketDst->specList;
+    //puts("HERE 2");
     while (dstPtr->nextSpec != NULL)
     {
+        //puts("HERE 3");
         dstPtr = dstPtr->nextSpec;
     }
     dstPtr->nextSpec = newSpecNode;
+    //puts("HERE 4");
 }
 
 SpecNode *initSpecNode()
@@ -68,11 +86,11 @@ SpecNode *initSpecNode()
     return newSpecNode;
 }
 
-HashBucket *searchHashTable(HashBucket **hashTable, char *specId)
+HashBucket *searchHashTable(HashTable *hashTable, char *specId)
 {
-    int posInHashTable = hashFunction(specId) % hashTableSize;
+    int posInHashTable = hashFunction(specId) % hashTable->size;
 
-    return hashTable[posInHashTable];
+    return hashTable->hashArray[posInHashTable];
 }
 
 void freeSpecNode(SpecNode *specNode)
@@ -87,18 +105,21 @@ void freeSpecNode(SpecNode *specNode)
 void freeHashBucket(HashBucket *hashBucket)
 {
     if (hashBucket == NULL)
+    {
         return;
+    }
     freeSpecNode(hashBucket->specList);
     free(hashBucket);
 }
 
-void freeHashTable(HashBucket **hashTable)
+void freeHashTable(HashTable *hashTable)
 {
     if (hashTable == NULL)
         return;
-    for (int i = 0; i < hashTableSize; i++)
+    for (int i = 0; i < hashTable->size; i++)
     {
-        freeHashBucket(hashTable[i]);
+        freeHashBucket(hashTable->hashArray[i]);
     }
+    free(hashTable->hashArray);
     free(hashTable);
 }
