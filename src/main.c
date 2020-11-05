@@ -10,9 +10,11 @@ int main(int argc, char **argv)
 
   //HashBucket **hashTable = initHashTable(count_datafiles(DATASET_PATH));
 
-  HashBucket **hashTable = initHashTable(count_datafiles(DATASET_PATH));
+  HashTable *hashTable = initHashTable(count_datafiles(DATASET_PATH));
 
   read_from_dir(DATASET_PATH, hashTable);
+
+  freeHashTable(hashTable);
 
   /*SpecInfo *spec = initSpecInfo("hello", "world");
   printf("%s\n", spec->specId);
@@ -31,5 +33,4 @@ int main(int argc, char **argv)
   // getArgs(&datasetX, &datasetW, argv);
 
   // read_from_file(datasetX);
-
 }

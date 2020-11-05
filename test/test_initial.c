@@ -26,6 +26,24 @@ void test_init(void)
    freeSpecInfo(test_spec);
 }
 
+void test_addToHTable()
+{
+   HashTable *hashTable = initHashTable(1000);
+   char *specid = strdup("kalispera");
+   char *title = strdup("test");
+   char *specid2 = strdup("kalispera-test");
+   char *title2 = strdup("test");
+   SpecInfo *specInfo = initSpecInfo(specid, title);
+   addToHashTable(hashTable, specInfo);
+   SpecInfo *specInfo2 = initSpecInfo(specid2, title2);
+   addToHashTable(hashTable, specInfo2);
+   freeHashTable(hashTable);
+   free(specid);
+   free(title);
+   free(specid2);
+   free(title2);
+}
+
 int main(void)
 {
    UnityBegin("test/test_initial.c");
@@ -33,7 +51,8 @@ int main(void)
    RUN_TEST(test_hello);
    //freeHashTable(initHashTable(29000));
    //freeCliqueNode(initCliqueNode());
-   readDictionary("Datasets/sigmod_medium_labelled_dataset.csv");
+   //readDictionary("Datasets/sigmod_medium_labelled_dataset.csv");
+   test_addToHTable();
 
    UnityEnd();
 
