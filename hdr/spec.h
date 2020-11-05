@@ -4,8 +4,6 @@
 typedef struct SpecInfo SpecInfo;
 typedef struct InfoList InfoList;
 typedef struct InfoNode InfoNode;
-typedef struct MoreOptionsList MoreList;
-typedef struct MoreOptionsNode MoreNode;
 
 struct SpecInfo
 {
@@ -19,7 +17,13 @@ void unitSpecInfo(SpecInfo *);
 void add_newInfo_toSpec(SpecInfo *, char *, char *);
 void add_newInfo_toSpec_option(SpecInfo *, char *, char *);
 void print_spec(SpecInfo *);
+void print_info_list(InfoList *list);
+void add_newInfo_toList(InfoList*, char*, char*);
+void initInfoNode(InfoNode *, char *, char*);
+void initInfoNode_withOptions(InfoNode *, char*, char*);
+void add_newInfo_toList_option(InfoList *, char*, char*);
 
+void add_newInfo_toNode(InfoNode *, char*, char*);
 struct InfoList
 {
   InfoNode *head;
@@ -28,19 +32,10 @@ struct InfoList
 struct InfoNode // Περιέχει την περιγραφή (description) του spec.
 {               // Σε μορφή λίστας θα αποθηκεύονται.
   char *description;
-  MoreList *contentList;
+  char *content; // description:content αντιστοίχιση των γραμμών του .json
   InfoNode *next;
 };
 
-struct MoreList { // List since some items have more than one options
-  int options;
-  MoreNode *head;
-};
-
-struct MoreNode {
-  char *content; // description:content αντιστοίχιση των γραμμών του .json
-  MoreNode *next;
-};
 
 
 #endif

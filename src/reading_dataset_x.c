@@ -106,8 +106,6 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
                       //printf("%s\n", pageTitle);
                       new_spec = initSpecInfo(sites_folder->d_name, pageTitle);
                       continue;
-                    } else {
-                      break;
                     }
                   } else {
                     // The attribute is not page title, but a new one
@@ -125,8 +123,8 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
                           strtok(option_line, s);
                           content = strtok(NULL, s);
                           if ( content != NULL ) {
-                            printf("%s: %s\n", description, content);
-                            add_newInfo_toSpec_option(new_spec, description, content);
+                            //printf("%s: %s\n", description, content);
+                            add_newInfo_toSpec(new_spec, description, content);
                           }
                           content = strtok(NULL, s);
                           if ( content !=  NULL ) {
@@ -141,13 +139,13 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
                     // Parse simple info
                     content = strtok(NULL, s);
                     if  ( content != NULL ) {
-                      //printf("%s: %s\n", descrirption, content);
+                      //printf("%s: %s\n", description, content);
                       add_newInfo_toSpec(new_spec, description, content);
                     }
                   }
                 }
               }
-              //print_spec(new_spec);
+              print_spec(new_spec);
 
               //addToHashTable(hash_table, new_spec);
               fclose(dataset_x);
