@@ -15,13 +15,9 @@ struct SpecInfo
 SpecInfo *initSpecInfo(char *, char *, char *);
 void unitSpecInfo(SpecInfo *);
 void add_newInfo_toSpec(SpecInfo *, char *, char *);
-void add_newInfo_toSpec_option(SpecInfo *, char *, char *);
 void print_spec(SpecInfo *);
 void print_info_list(InfoList *list);
 void add_newInfo_toList(InfoList*, char*, char*);
-void initInfoNode(InfoNode *, char *, char*);
-void initInfoNode_withOptions(InfoNode *, char*, char*);
-void add_newInfo_toList_option(InfoList *, char*, char*);
 
 void add_newInfo_toNode(InfoNode *, char*, char*);
 struct InfoList

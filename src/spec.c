@@ -102,35 +102,6 @@ void add_newInfo_toNode(InfoNode *node, char *desc, char *info) {
   node->next = NULL;
 }
 
-void initInfoNode(InfoNode *node, char *desc, char *info) {
-  if ( desc == NULL || info == NULL ) {
-    return;
-  }
-
-}
-
-void add_newInfo_toSpec_option(SpecInfo *spec, char *desc, char* option) {
-  if ( spec == NULL || desc == NULL || option == NULL ) {
-    printf("Error: adding to spec_opt null values\n");
-    return;
-  }
-  if ( spec->specId == NULL || spec->pageTitle == NULL ) {
-    printf("Error: add to spec_opt on uninitialized spec\n");
-    return;
-  }
-
-}
-
-void add_newInfo_toList_option(InfoList *list, char *desc, char *option) {
-
-}
-
-void initInfoNode_withOptions(InfoNode *node, char *desc, char *option) {
-  if ( desc == NULL || option == NULL ) {
-    return;
-  }
-
-}
 
 
 void print_spec(SpecInfo *spec) {
@@ -155,9 +126,6 @@ void print_info_list(InfoList *list) {
     printf("\t\t%s:\t%s\n", temp->description, temp->content);
     temp = temp->next;
   }
-
-
-
   return;
 }
 

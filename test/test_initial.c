@@ -18,13 +18,13 @@ void test_hello(void)
 
 void test_init(void)
 {
-   SpecInfo *test_spec = initSpecInfo("test_1", "test_2");
+   SpecInfo *test_spec = initSpecInfo("site", "test_1.json", "test_2");
    TEST_ASSERT_NOT_NULL(test_spec);
-   TEST_ASSERT_EQUAL_STRING("test_1", test_spec->specId);
+   TEST_ASSERT_EQUAL_STRING("site//test_1", test_spec->specId);
    TEST_ASSERT_EQUAL_STRING("test_2", test_spec->pageTitle);
    //unitSpecInfo(test_spec);
    freeSpecInfo(test_spec);
-}
+}1
 
 int main(void)
 {
