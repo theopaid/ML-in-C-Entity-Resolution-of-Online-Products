@@ -12,7 +12,7 @@ struct SpecInfo
   InfoList *infoList;
 };
 
-SpecInfo* initSpecInfo(char *, char*);
+SpecInfo *initSpecInfo(char *, char *);
 void unitSpecInfo(SpecInfo *);
 void add_newInfo_toSpec(SpecInfo *, char *, char *);
 void add_newInfo_toSpec_option(SpecInfo *, char *, char *);
@@ -36,6 +36,11 @@ struct InfoNode // Περιέχει την περιγραφή (description) το
   InfoNode *next;
 };
 
+void freeInfoNode(InfoNode *infoNode);
+
+void freeInfoList(InfoList *infoList);
+
+void freeSpecInfo(SpecInfo *specInfo);
 
 
 #endif

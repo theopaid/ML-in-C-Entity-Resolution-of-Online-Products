@@ -1,12 +1,16 @@
 #include "../hdr/includes.h"
 
+#define MAXLINE 1024
+
 char *getField(char *line, int fieldNum)
 {
     char *tok;
     for (tok = strtok(line, ","); tok && *tok; tok = strtok(NULL, ",\n"))
     {
         if (!--fieldNum)
+        {
             return tok;
+        }
     }
     return NULL;
 }
@@ -14,18 +18,27 @@ char *getField(char *line, int fieldNum)
 void readDictionary(char *fileName)
 {
     FILE *stream = fopen(fileName, "r");
-
-    char line[1024];
-    int isMatching;
-    while (fgets(line, 1024, stream))
+    if (stream == NULL)
     {
-        char *tmp = strdup(line);
-        int isMatching = atoi(getField(tmp, 3));
+        printf("Could not create %s\n", fileName);
+        exit(EXIT_FAILURE);
+    }
+
+    char line[MAXLINE];
+    int isMatching;
+    while (fgets(line, MAXLINE, stream))
+    {
+        char *tmp1 = strdup(line), *tmp2 = strdup(line), *tmp3 = strdup(line);
+        int isMatching = atoi(getField(tmp1, 3));
         if (isMatching)
         {
-            updateCliques(getField(tmp, 1), getField(tmp, 2));
+            updateCliques(getField(tmp2, 1), getField(tmp3, 2));
         }
 
-        free(tmp);
+        free(tmp1);
+        free(tmp2);
+        free(tmp3);
     }
+
+    fclose(stream);
 }

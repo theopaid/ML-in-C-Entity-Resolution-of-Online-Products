@@ -29,4 +29,10 @@ void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode);
 
 HashBucket *searchHashTable(HashBucket **hashTable, char *specId);
 
+void freeSpecNode(SpecNode *specNode);
+
+void freeHashBucket(HashBucket *hashBucket);
+
+void freeHashTable(HashBucket **hashTable);
+
 #endif

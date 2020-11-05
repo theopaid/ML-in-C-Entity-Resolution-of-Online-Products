@@ -9,7 +9,8 @@ HashBucket **initHashTable(int specSum)
 
     for (int i = 0; i < bucketsToAlloc; i++)
     {
-        newHashTable[i] = NULL;
+        newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
+        newHashTable[i]->specList = NULL;
     }
     hashTableSize = bucketsToAlloc;
 
@@ -72,4 +73,32 @@ HashBucket *searchHashTable(HashBucket **hashTable, char *specId)
     int posInHashTable = hashFunction(specId) % hashTableSize;
 
     return hashTable[posInHashTable];
+}
+
+void freeSpecNode(SpecNode *specNode)
+{
+    if (specNode == NULL)
+        return;
+    freeCliqueNode(specNode->cliquePtr);
+    freeSpecNode(specNode->nextSpec);
+    free(specNode);
+}
+
+void freeHashBucket(HashBucket *hashBucket)
+{
+    if (hashBucket == NULL)
+        return;
+    freeSpecNode(hashBucket->specList);
+    free(hashBucket);
+}
+
+void freeHashTable(HashBucket **hashTable)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTableSize; i++)
+    {
+        freeHashBucket(hashTable[i]);
+    }
+    free(hashTable);
 }
