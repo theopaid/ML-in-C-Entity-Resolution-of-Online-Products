@@ -12,7 +12,7 @@ struct SpecInfo
   InfoList *infoList;
 };
 
-SpecInfo *initSpecInfo(char *, char *);
+SpecInfo *initSpecInfo(char *, char *, char *);
 void unitSpecInfo(SpecInfo *);
 void add_newInfo_toSpec(SpecInfo *, char *, char *);
 void add_newInfo_toSpec_option(SpecInfo *, char *, char *);

@@ -1,10 +1,15 @@
 #include "../hdr/includes.h"
 
-SpecInfo *initSpecInfo(char *id, char *title)
+SpecInfo *initSpecInfo(char *site, char *id, char *title)
 {
     SpecInfo *newSpec = (SpecInfo *)safe_malloc(sizeof(SpecInfo));
-    newSpec->specId = (char *)safe_malloc(strlen(id) + 1);
-    strcpy(newSpec->specId, id);
+    char *json_stripped_id = (char*)safe_malloc(strlen(id) - 4);
+    strncpy(json_stripped_id, id, strlen(id)-5);
+    json_stripped_id[strlen(id)-5] = 0;
+    newSpec->specId = (char *)safe_malloc(strlen(site) + strlen(json_stripped_id) + 3);
+    strcpy(newSpec->specId, site);
+    strcat(newSpec->specId, "//");
+    strcat(newSpec->specId, json_stripped_id);
     newSpec->pageTitle = (char *)safe_malloc(strlen(title) + 1);
     strcpy(newSpec->pageTitle, title);
     newSpec->infoList = NULL;

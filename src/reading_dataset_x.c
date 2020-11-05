@@ -104,7 +104,7 @@ void read_from_dir(char *dir_name, HashBucket **hash_table) {
                     //pageTitle = strtok(pageTitle, "|-,"); // If we wanted to strip the title and keep only the "usefull" info
                     if ( pageTitle != NULL ) {
                       //printf("%s\n", pageTitle);
-                      new_spec = initSpecInfo(sites_folder->d_name, pageTitle);
+                      new_spec = initSpecInfo(sites_folder->d_name, specs_folder->d_name, pageTitle);
                       continue;
                     }
                   } else {
