@@ -42,4 +42,8 @@ void freeHashBucket(HashBucket *hashBucket);
 
 void freeHashTable(HashTable *hashTable);
 
+int closestPrime(int num);
+
+void printHashingBenchmarks();
+
 #endif

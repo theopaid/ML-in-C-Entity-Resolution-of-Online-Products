@@ -1,9 +1,41 @@
 #include "../hdr/includes.h"
 
+/**
+ * For Benchmarking use only!
+ * */
+int collisions = 0;
+int insertions = 0;
+int searchInChain = 0;
+int bucketsCreated = 0;
+/////////////////
+
+static int primes[72] = {
+    3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
+    1103, 1327, 1597, 1931, 2333, 2801, 3371, 4049, 4861, 5839, 7013, 8419, 10103, 12143, 14591,
+    17519, 21023, 25229, 30293, 36353, 43627, 52361, 62851, 75431, 90523, 108631, 130363, 156437,
+    187751, 225307, 270371, 324449, 389357, 467237, 560689, 672827, 807403, 968897, 1162687, 1395263,
+    1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369};
+
+int closestPrime(int num)
+{
+    for (int i = 0; i < 72; i++)
+    {
+        if (num < primes[i])
+        {
+            return primes[i];
+        }
+    }
+
+    return num; // to be safe
+}
+
 HashTable *initHashTable(int specSum)
 {
-    int bucketsToAlloc = specSum / 0.7; // we need a load factor of at least 70%, to minimize collisions
-    //HashBucket **newHashTable = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
+    int bucketsToAlloc = specSum / 0.5; // we need a load factor of at least 70%, to minimize collisions
+                                        // let's double the size here
+    bucketsToAlloc = closestPrime(bucketsToAlloc);
+    bucketsCreated = bucketsToAlloc; // for benchmarking only
+
     HashTable *hashTable = (HashTable *)safe_malloc(sizeof(HashTable));
     hashTable->size = bucketsToAlloc;
     hashTable->hashArray = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
@@ -11,10 +43,7 @@ HashTable *initHashTable(int specSum)
     for (int i = 0; i < bucketsToAlloc; i++)
     {
         hashTable->hashArray[i] = NULL;
-        //newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
-        //newHashTable[i]->specList = NULL;
     }
-    printf("table size init: %ld\n", hashTable->size);
     return hashTable;
 }
 
@@ -22,12 +51,9 @@ HashTable *initHashTable(int specSum)
 unsigned long long hashFunction(char *specId)
 {
     unsigned long long h = 0;
-    //int offset = 0;
     long len = strlen(specId);
-    //char val[] = specId;
     for (int i = 0; i < len; i++)
     {
-        //printf("h: %llu, specid: %d\n", h, specId[i]);
         h = 31 * h + specId[i];
     }
 
@@ -38,14 +64,12 @@ void addToHashTable(HashTable *hashTable, SpecInfo *specToAdd)
 {
     // call hash function, allocate specnode and cliqueNode and store them in hashArray
     unsigned long long hash = hashFunction(specToAdd->specId);
-    printf("hash: %llu, size: %ld\n", hash, hashTable->size);
     long posInHashTable = hash % hashTable->size;
     SpecNode *newSpecNode = initSpecNode();
     CliqueNode *newCliqueNode = initCliqueNode();
 
     newCliqueNode->specInfo = specToAdd;
     newSpecNode->cliquePtr = newCliqueNode;
-    printf("Inserting in pos: %ld\n", posInHashTable);
     if (hashTable->hashArray[posInHashTable] == NULL)
     {
         hashTable->hashArray[posInHashTable] = (HashBucket *)safe_malloc(sizeof(HashBucket));
@@ -56,25 +80,20 @@ void addToHashTable(HashTable *hashTable, SpecInfo *specToAdd)
 
 void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode)
 {
-    //puts("HERE ");
-    //puts(" ");
+    insertions++;
     if (bucketDst->specList == NULL)
     {
-        //puts("HERE 1");
-        //puts(" ");
         bucketDst->specList = newSpecNode;
         return;
     }
-    //puts("HERE 1.5");
+    collisions++;
     SpecNode *dstPtr = bucketDst->specList;
-    //puts("HERE 2");
     while (dstPtr->nextSpec != NULL)
     {
-        //puts("HERE 3");
+        searchInChain++;
         dstPtr = dstPtr->nextSpec;
     }
     dstPtr->nextSpec = newSpecNode;
-    //puts("HERE 4");
 }
 
 SpecNode *initSpecNode()
@@ -122,4 +141,12 @@ void freeHashTable(HashTable *hashTable)
     }
     free(hashTable->hashArray);
     free(hashTable);
+}
+
+void printHashingBenchmarks()
+{
+    printf("Bucket pointers created: %d\n", bucketsCreated);
+    printf("Insertions: %d\n", insertions);
+    printf("Collisions: %d\n", collisions);
+    printf("Searches in chains: %d\n", searchInChain);
 }
