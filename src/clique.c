@@ -11,6 +11,7 @@ CliqueNode *initCliqueNode()
 
 void updateCliques(char *leftSpecId, char *rightSpecId)
 {
+    printf("left: %s, right: %s\n", leftSpecId, rightSpecId);
 }
 
 void freeCliqueNode(CliqueNode *cliqueNode)
