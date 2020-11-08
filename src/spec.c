@@ -157,7 +157,7 @@ void print_spec(SpecInfo *spec)
     printf("UNINITIALIZED SPEC\n");
     return;
   }
-  printf("\tSPEC:\t%s\n\t\tTITLE:\t%s\n", spec->specId, spec->pageTitle);
+  //printf("\tSPEC:\t%s\n\t\tTITLE:\t%s\n", spec->specId, spec->pageTitle);
 
   print_info_list(spec->infoList);
   return;
@@ -174,7 +174,7 @@ void print_info_list(InfoList *list)
   InfoNode *temp = list->head;
   while (temp != NULL)
   {
-    printf("\t\t%s:\t%s\n", temp->description, temp->content);
+    //printf("\t\t%s:\t%s\n", temp->description, temp->content);
     temp = temp->next;
   }
 

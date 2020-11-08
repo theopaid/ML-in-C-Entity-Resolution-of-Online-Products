@@ -20,7 +20,15 @@ int main(int argc, char **argv)
   HashTable *hashTable = initHashTable(count_datafiles(datasetX));
 
   read_from_dir(datasetX, hashTable);
-  readDictionary(datasetW);
+  readDictionary(datasetW, hashTable);
+
+  FILE *fptr = fopen("./output/matches.txt", "w");
+  if (fptr == NULL)
+  {
+    printf("Could not open file");
+  }
+  printAllMatches(hashTable, fptr);
+  fclose(fptr);
 
   freeHashTable(hashTable);
 

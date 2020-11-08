@@ -34,7 +34,15 @@ void addToHashTable(HashTable *, SpecInfo *);
 
 void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode);
 
-HashBucket *searchHashTable(HashTable *hashTable, char *specId);
+SpecNode *searchHashTable(HashTable *hashTable, char *specId);
+
+SpecNode *searchChain(SpecNode *head, char *specId);
+
+void printAllMatches(HashTable *hashTable, FILE *fptr);
+
+void printSpecMatchesInChain(SpecNode *head, FILE *fptr);
+
+void printVisitedSpecNodesCount();
 
 void freeSpecNode(SpecNode *specNode);
 

@@ -22,6 +22,7 @@ typedef struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα
 {                         // Όταν δημιουργούνται ζευγάρια, θα ενωποιούνται αυτά, κάνοντας update το *next.
     SpecInfo *specInfo;
     CliqueNode *next;
+    CliqueNode *prev;
 };
 
 typedef struct SpecInfo

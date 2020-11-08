@@ -2,7 +2,7 @@
 
 PROGRAM_NAME = main
 DATASET_X = ./Datasets/2013_camera_specs/
-DATASET_W = ./Datasets/sigmod_medium_labelled_dataset.csv
+DATASET_W = ./Datasets/sigmod_large_labelled_dataset.csv
 
 # Compilation flags
 CFLAGS  = -std=gnu99

@@ -7,6 +7,7 @@ int collisions = 0;
 int insertions = 0;
 int searchInChain = 0;
 int bucketsCreated = 0;
+int specNodesVisited = 0;
 /////////////////
 
 static int primes[72] = {
@@ -105,11 +106,54 @@ SpecNode *initSpecNode()
     return newSpecNode;
 }
 
-HashBucket *searchHashTable(HashTable *hashTable, char *specId)
+SpecNode *searchHashTable(HashTable *hashTable, char *specId)
 {
     int posInHashTable = hashFunction(specId) % hashTable->size;
 
-    return hashTable->hashArray[posInHashTable];
+    return searchChain(hashTable->hashArray[posInHashTable]->specList, specId);
+}
+
+SpecNode *searchChain(SpecNode *head, char *specId)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        if (strcmp(specId, specPtr->cliquePtr->specInfo->specId) == 0) // found
+        {
+            break;
+        }
+        specPtr = specPtr->nextSpec;
+    }
+    return specPtr;
+}
+
+void printAllMatches(HashTable *hashTable, FILE *fptr)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        printSpecMatchesInChain(hashTable->hashArray[i]->specList, fptr);
+    }
+}
+
+void printSpecMatchesInChain(SpecNode *head, FILE *fptr)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        specNodesVisited++;
+        printSpecMatches(specPtr, fptr);
+        removeFromClique(specPtr->cliquePtr);
+        specPtr = specPtr->nextSpec;
+    }
+}
+
+void printVisitedSpecNodesCount()
+{
+    printf("Visited Spec nodes: %d\n", specNodesVisited);
 }
 
 void freeSpecNode(SpecNode *specNode)
