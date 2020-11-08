@@ -15,7 +15,7 @@ char *getField(char *line, int fieldNum)
     return NULL;
 }
 
-void readDictionary(char *fileName)
+void readDictionary(char *fileName, HashTable *hashTable)
 {
     FILE *stream = fopen(fileName, "r");
     if (stream == NULL)
@@ -32,7 +32,7 @@ void readDictionary(char *fileName)
         int isMatching = atoi(getField(tmp1, 3));
         if (isMatching)
         {
-            updateCliques(getField(tmp2, 1), getField(tmp3, 2));
+            updateCliques(getField(tmp2, 1), getField(tmp3, 2), hashTable);
         }
 
         free(tmp1);

@@ -61,6 +61,8 @@ void printInsights()
     puts("|========== Insights ==========|");
     puts(" ");
     printHashingBenchmarks();
+    printMatchesCount();
+    printVisitedSpecNodesCount();
     printExecTime();
     puts(" ");
     puts("|==============================|");
