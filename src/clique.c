@@ -14,20 +14,25 @@ CliqueNode *initCliqueNode()
 
 void updateCliques(char *leftSpecId, char *rightSpecId, HashTable *hashTable)
 {
-    //printf("left: %s, right: %s\n", leftSpecId, rightSpecId);
     CliqueNode *leftClique = getCliqueNode(leftSpecId, hashTable);
     CliqueNode *rightClique = getCliqueNode(rightSpecId, hashTable);
+    if (leftClique == NULL || rightClique == NULL)
+        return;
     makeCliqueAdjustmnets(leftClique, rightClique);
 }
 
 CliqueNode *getCliqueNode(char *specId, HashTable *hashTable)
 {
     SpecNode *mySpecNode = searchHashTable(hashTable, specId);
+    if (mySpecNode == NULL)
+        return NULL;
     return mySpecNode->cliquePtr;
 }
 
 void makeCliqueAdjustmnets(CliqueNode *leftClique, CliqueNode *rightClique)
 {
+    if (leftClique == NULL || rightClique == NULL)
+        return;
     if (alreadyInSameClique(leftClique, rightClique) == 1)
     {
         return;
@@ -53,7 +58,7 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
     while (strcmp(cliquePtr->specInfo->specId, cliqueNode->specInfo->specId) != 0)
     {
         matchesFound++;
-        //printf("%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
+        printf("%s,%s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         if (fptr != NULL)
             fprintf(fptr, "%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         cliquePtr = cliquePtr->next;
@@ -62,6 +67,8 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
 
 int alreadyInSameClique(CliqueNode *leftCliqueNode, CliqueNode *rightCliqueNode)
 {
+    if (leftCliqueNode == NULL || rightCliqueNode == NULL)
+        return 0;
     CliqueNode *cliquePtr = leftCliqueNode->next;
     while (strcmp(cliquePtr->specInfo->specId, leftCliqueNode->specInfo->specId) != 0)
     {

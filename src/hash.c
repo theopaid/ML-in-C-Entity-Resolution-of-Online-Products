@@ -109,7 +109,8 @@ SpecNode *initSpecNode()
 SpecNode *searchHashTable(HashTable *hashTable, char *specId)
 {
     int posInHashTable = hashFunction(specId) % hashTable->size;
-
+    if (hashTable->hashArray[posInHashTable] == NULL)
+        return NULL;
     return searchChain(hashTable->hashArray[posInHashTable]->specList, specId);
 }
 

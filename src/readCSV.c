@@ -25,7 +25,6 @@ void readDictionary(char *fileName, HashTable *hashTable)
     }
 
     char line[MAXLINE];
-    int isMatching;
     while (fgets(line, MAXLINE, stream))
     {
         char *tmp1 = strdup(line), *tmp2 = strdup(line), *tmp3 = strdup(line);
