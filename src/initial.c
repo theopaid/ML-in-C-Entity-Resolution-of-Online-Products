@@ -1,4 +1,3 @@
-#include "../hdr/includes.h"
 
 const char *hello(void)
 {
