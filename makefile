@@ -78,7 +78,8 @@ r: run
 
 .PHONY: test
 test: build/test
-	./build/test
+	@valgrind $(VFLAGS) ./build/test
+	@echo "Memory check passed"
 PHONY: t
 t: test
 

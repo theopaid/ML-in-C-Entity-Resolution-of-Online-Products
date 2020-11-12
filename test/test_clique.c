@@ -70,6 +70,20 @@ void test_removeFromClique(void)
     freeHashTable(hashTable);
 }
 
+void test_resetAllPrintedStatus(void)
+{
+    HashTable *hashTable = initHashTable(count_datafiles("./Datasets/2013_camera_specs/"));
+    read_from_dir("./Datasets/2013_camera_specs/", hashTable);
+    readDictionary("./test_files/test_csv.csv", hashTable);
+    CliqueNode *cliqueNode = getCliqueNode("www.shopbot.com.au//331", hashTable);
+    cliqueNode->isPrinted = 1;
+    TEST_ASSERT(cliqueNode->isPrinted == 1);
+    resetAllPrintedStatus(hashTable);
+    TEST_ASSERT(cliqueNode->isPrinted == 0);
+
+    freeHashTable(hashTable);
+}
+
 void test_clique()
 {
     UnityBegin("../test/test_clique.c");
@@ -79,6 +93,7 @@ void test_clique()
     RUN_TEST(test_alreadyInSameClique);
     RUN_TEST(test_cliqueAdjustments);
     RUN_TEST(test_removeFromClique);
+    RUN_TEST(test_resetAllPrintedStatus);
 
     UnityEnd();
 }
