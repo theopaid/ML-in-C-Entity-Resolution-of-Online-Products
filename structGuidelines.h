@@ -23,6 +23,7 @@ typedef struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα
     SpecInfo *specInfo;
     CliqueNode *next;
     CliqueNode *prev;
+    int isPrinted;
 };
 
 typedef struct SpecInfo

@@ -8,6 +8,7 @@ CliqueNode *initCliqueNode()
     newCliqueNode->specInfo = NULL;
     newCliqueNode->next = newCliqueNode; // we have a cyclic list
     newCliqueNode->prev = newCliqueNode;
+    newCliqueNode->isPrinted = 0;
 
     return newCliqueNode;
 }
@@ -80,6 +81,28 @@ int alreadyInSameClique(CliqueNode *leftCliqueNode, CliqueNode *rightCliqueNode)
     }
 
     return 0;
+}
+
+void resetAllPrintedStatus(HashTable *hashTable)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        resetAllPrintedStatusInChain(hashTable->hashArray[i]->specList);
+    }
+}
+
+void resetAllPrintedStatusInChain(SpecNode *head)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        specPtr->cliquePtr->isPrinted = 0;
+        specPtr = specPtr->nextSpec;
+    }
 }
 
 void printMatchesCount()

@@ -13,6 +13,7 @@ struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα. Αρχ
     SpecInfo *specInfo;
     CliqueNode *next;
     CliqueNode *prev;
+    int isPrinted;
 };
 
 CliqueNode *initCliqueNode();
@@ -30,6 +31,10 @@ void removeFromClique(CliqueNode *cliqueNode);
 int alreadyInSameClique(CliqueNode *leftCliqueNode, CliqueNode *rightCliqueNode);
 
 void printMatchesCount();
+
+void resetAllPrintedStatus(HashTable *hashTable);
+
+void resetAllPrintedStatusInChain(SpecNode *head);
 
 void freeCliqueNode(CliqueNode *cliqueNode);
 
