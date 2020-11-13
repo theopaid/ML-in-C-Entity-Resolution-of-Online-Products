@@ -21,10 +21,20 @@ void test_hello(void)
 
 int main(void)
 {
+
+   /*SpecInfo *test_spec = initSpecInfo("site", "test_1.json", "test_2");
+   TEST_ASSERT_NOT_NULL(test_spec);
+   TEST_ASSERT_EQUAL_STRING("site//test_1", test_spec->specId);
+   TEST_ASSERT_EQUAL_STRING("test_2", test_spec->pageTitle);
+   //unitSpecInfo(test_spec);
+   freeSpecInfo(test_spec);
+}*/
+
    test_hashing();
    test_clique();
    return 0;
 }
+
 
 void printExecTime()
 {

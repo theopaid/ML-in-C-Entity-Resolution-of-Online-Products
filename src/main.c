@@ -19,8 +19,15 @@ int main(int argc, char **argv)
 
   HashTable *hashTable = initHashTable(count_datafiles(datasetX));
 
+  //print_cliques(hashTable);
+
+  /*SpecInfo *spec = initSpecInfo("hello", "world");
+  printf("%s\n", spec->specId);
+  printf("%s\n", spec->pageTitle);*/
+
   read_from_dir(datasetX, hashTable);
   readDictionary(datasetW, hashTable);
+
 
   FILE *fptr = fopen("./output/matches.txt", "w");
   if (fptr == NULL)
