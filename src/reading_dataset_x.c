@@ -174,7 +174,7 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
                   }
                 }
               }
-              print_spec(new_spec);
+              //print_spec(new_spec);
 
               addToHashTable(hash_table, new_spec);
               fclose(dataset_x);
