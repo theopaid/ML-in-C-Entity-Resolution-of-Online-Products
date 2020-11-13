@@ -28,6 +28,8 @@ int main(int argc, char **argv)
     printf("Could not open file");
   }
   printAllMatches(hashTable, fptr);
+  resetAllPrintedStatus(hashTable);
+  //print_cliques(hashTable);
   fclose(fptr);
 
   freeHashTable(hashTable);

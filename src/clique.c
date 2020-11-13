@@ -58,6 +58,10 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
     CliqueNode *cliquePtr = cliqueNode->next;
     while (strcmp(cliquePtr->specInfo->specId, cliqueNode->specInfo->specId) != 0)
     {
+        if ( cliquePtr->isPrinted == 1) {
+          cliquePtr = cliquePtr->next;
+          continue;
+        }
         matchesFound++;
         printf("%s,%s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         if (fptr != NULL)

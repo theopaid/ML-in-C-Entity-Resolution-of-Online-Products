@@ -147,7 +147,8 @@ void printSpecMatchesInChain(SpecNode *head, FILE *fptr)
     {
         specNodesVisited++;
         printSpecMatches(specPtr, fptr);
-        removeFromClique(specPtr->cliquePtr);
+        specPtr->cliquePtr->isPrinted = 1;
+        //removeFromClique(specPtr->cliquePtr);
         specPtr = specPtr->nextSpec;
     }
 }

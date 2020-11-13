@@ -24,4 +24,6 @@
 #include "reading_dataset_x.h"
 #include "readCSV.h"
 
+#include "printing_cliques.h"
+
 #endif
