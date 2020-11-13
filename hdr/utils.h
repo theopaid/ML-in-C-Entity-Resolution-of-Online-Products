@@ -11,4 +11,6 @@ int validArgs(int argc, char *argv[]);
 
 void getArgs(char **datasetX, char **datasetY, char *argv[]);
 
+void printInsights();
+
 #endif

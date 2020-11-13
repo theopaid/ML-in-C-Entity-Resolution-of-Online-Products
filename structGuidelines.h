@@ -6,6 +6,12 @@ typedef struct HashBucket
     SpecNode *specList;
 };
 
+typedef struct HashTable
+{
+    long size;
+    HashBucket **hashArray;
+};
+
 typedef struct SpecNode
 {
     CliqueNode *cliquePtr;
@@ -16,11 +22,13 @@ typedef struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα
 {                         // Όταν δημιουργούνται ζευγάρια, θα ενωποιούνται αυτά, κάνοντας update το *next.
     SpecInfo *specInfo;
     CliqueNode *next;
+    CliqueNode *prev;
+    int isPrinted;
 };
 
 typedef struct SpecInfo
 {
-    char  *specId;
+    char *specId;
     char *pageTitle;
     InfoList *infoList;
 };
@@ -30,14 +38,9 @@ typedef struct InfoList
     InfoNode *head;
 };
 
-
 typedef struct InfoNode // Περιέχει την περιγραφή (descirption) του spec.
 {                       // Σε μορφή λίστας θα αποθηκεύονται.
-    char *descirption;          
-    char *content;        // description:content αντιστοίχιση των γραμμών του .json
+    char *descirption;
+    char *content; // description:content αντιστοίχιση των γραμμών του .json
     InfoNode *next;
 };
-
-
-
-

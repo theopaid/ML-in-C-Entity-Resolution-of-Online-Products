@@ -1,59 +1,97 @@
 #include "../hdr/includes.h"
 
-int hashTableSize;
+/**
+ * For Benchmarking use only!
+ * */
+int collisions = 0;
+int insertions = 0;
+int searchInChain = 0;
+int bucketsCreated = 0;
+int specNodesVisited = 0;
+/////////////////
 
-HashBucket **initHashTable(int specSum)
+static int primes[72] = {
+    3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
+    1103, 1327, 1597, 1931, 2333, 2801, 3371, 4049, 4861, 5839, 7013, 8419, 10103, 12143, 14591,
+    17519, 21023, 25229, 30293, 36353, 43627, 52361, 62851, 75431, 90523, 108631, 130363, 156437,
+    187751, 225307, 270371, 324449, 389357, 467237, 560689, 672827, 807403, 968897, 1162687, 1395263,
+    1674319, 2009191, 2411033, 2893249, 3471899, 4166287, 4999559, 5999471, 7199369};
+
+int closestPrime(int num)
 {
-    int bucketsToAlloc = specSum / 0.7; // we need a load factor of at least 70%, to minimize collisions
-    HashBucket **newHashTable = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
+    for (int i = 0; i < 72; i++)
+    {
+        if (num < primes[i])
+        {
+            return primes[i];
+        }
+    }
+
+    return num; // to be safe
+}
+
+HashTable *initHashTable(int specSum)
+{
+    int bucketsToAlloc = specSum / 0.5; // we need a load factor of at least 70%, to minimize collisions
+                                        // let's double the size here
+    bucketsToAlloc = closestPrime(bucketsToAlloc);
+    bucketsCreated = bucketsToAlloc; // for benchmarking only
+
+    HashTable *hashTable = (HashTable *)safe_malloc(sizeof(HashTable));
+    hashTable->size = bucketsToAlloc;
+    hashTable->hashArray = (HashBucket **)safe_calloc(bucketsToAlloc, sizeof(HashBucket *));
 
     for (int i = 0; i < bucketsToAlloc; i++)
     {
-        newHashTable[i] = (HashBucket *)safe_malloc(sizeof(HashBucket));
-        newHashTable[i]->specList = NULL;
+        hashTable->hashArray[i] = NULL;
     }
-    hashTableSize = bucketsToAlloc;
-
-    return newHashTable;
+    return hashTable;
 }
 
 // Java's java.lang.String hashCode() method
-int hashFunction(char *specId)
+unsigned long long hashFunction(char *specId)
 {
-    int h = 0;
-    int offset = 0;
-    int len = strlen(specId);
+    unsigned long long h = 0;
+    long len = strlen(specId);
     for (int i = 0; i < len; i++)
     {
-        h = 31 * h + specId[offset++];
+        h = 31 * h + specId[i];
     }
 
     return h;
 }
 
-void addToHashTable(HashBucket **hashTable, SpecInfo *specToAdd)
+void addToHashTable(HashTable *hashTable, SpecInfo *specToAdd)
 {
     // call hash function, allocate specnode and cliqueNode and store them in hashArray
-    int hash = hashFunction(specToAdd->specId);
-    int posInHashTable = hash % hashTableSize;
+    unsigned long long hash = hashFunction(specToAdd->specId);
+    long posInHashTable = hash % hashTable->size;
     SpecNode *newSpecNode = initSpecNode();
     CliqueNode *newCliqueNode = initCliqueNode();
 
     newCliqueNode->specInfo = specToAdd;
     newSpecNode->cliquePtr = newCliqueNode;
-    insertInChain(hashTable[posInHashTable], newSpecNode);
+    if (hashTable->hashArray[posInHashTable] == NULL)
+    {
+        hashTable->hashArray[posInHashTable] = (HashBucket *)safe_malloc(sizeof(HashBucket));
+        hashTable->hashArray[posInHashTable]->specList = NULL;
+    }
+    insertInChain(hashTable->hashArray[posInHashTable], newSpecNode);
 }
 
 void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode)
 {
+    insertions++;
     if (bucketDst->specList == NULL)
     {
         bucketDst->specList = newSpecNode;
         return;
     }
+    collisions++;
     SpecNode *dstPtr = bucketDst->specList;
     while (dstPtr->nextSpec != NULL)
     {
+        searchInChain++;
         dstPtr = dstPtr->nextSpec;
     }
     dstPtr->nextSpec = newSpecNode;
@@ -68,11 +106,55 @@ SpecNode *initSpecNode()
     return newSpecNode;
 }
 
-HashBucket *searchHashTable(HashBucket **hashTable, char *specId)
+SpecNode *searchHashTable(HashTable *hashTable, char *specId)
 {
-    int posInHashTable = hashFunction(specId) % hashTableSize;
+    int posInHashTable = hashFunction(specId) % hashTable->size;
+    if (hashTable->hashArray[posInHashTable] == NULL)
+        return NULL;
+    return searchChain(hashTable->hashArray[posInHashTable]->specList, specId);
+}
 
-    return hashTable[posInHashTable];
+SpecNode *searchChain(SpecNode *head, char *specId)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        if (strcmp(specId, specPtr->cliquePtr->specInfo->specId) == 0) // found
+        {
+            break;
+        }
+        specPtr = specPtr->nextSpec;
+    }
+    return specPtr;
+}
+
+void printAllMatches(HashTable *hashTable, FILE *fptr)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        printSpecMatchesInChain(hashTable->hashArray[i]->specList, fptr);
+    }
+}
+
+void printSpecMatchesInChain(SpecNode *head, FILE *fptr)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        specNodesVisited++;
+        printSpecMatches(specPtr, fptr);
+        removeFromClique(specPtr->cliquePtr);
+        specPtr = specPtr->nextSpec;
+    }
+}
+
+void printVisitedSpecNodesCount()
+{
+    printf("Visited Spec nodes: %d\n", specNodesVisited);
 }
 
 void freeSpecNode(SpecNode *specNode)
@@ -87,18 +169,29 @@ void freeSpecNode(SpecNode *specNode)
 void freeHashBucket(HashBucket *hashBucket)
 {
     if (hashBucket == NULL)
+    {
         return;
+    }
     freeSpecNode(hashBucket->specList);
     free(hashBucket);
 }
 
-void freeHashTable(HashBucket **hashTable)
+void freeHashTable(HashTable *hashTable)
 {
     if (hashTable == NULL)
         return;
-    for (int i = 0; i < hashTableSize; i++)
+    for (int i = 0; i < hashTable->size; i++)
     {
-        freeHashBucket(hashTable[i]);
+        freeHashBucket(hashTable->hashArray[i]);
     }
+    free(hashTable->hashArray);
     free(hashTable);
+}
+
+void printHashingBenchmarks()
+{
+    printf("Bucket pointers created: %d\n", bucketsCreated);
+    printf("Insertions: %d\n", insertions);
+    printf("Collisions: %d\n", collisions);
+    printf("Searches in chains: %d\n", searchInChain);
 }

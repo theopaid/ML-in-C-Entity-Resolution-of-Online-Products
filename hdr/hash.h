@@ -3,8 +3,15 @@
 
 #include "../hdr/clique.h"
 
+typedef struct HashTable HashTable;
 typedef struct HashBucket HashBucket;
 typedef struct SpecNode SpecNode;
+
+struct HashTable
+{
+    long size;
+    HashBucket **hashArray;
+};
 
 struct HashBucket
 {
@@ -19,20 +26,32 @@ struct SpecNode
 
 SpecNode *initSpecNode();
 
-HashBucket **initHashTable(int);
+HashTable *initHashTable(int);
 
-int hashFunction(char *);
+unsigned long long hashFunction(char *);
 
-void addToHashTable(HashBucket **, SpecInfo *);
+void addToHashTable(HashTable *, SpecInfo *);
 
 void insertInChain(HashBucket *bucketDst, SpecNode *newSpecNode);
 
-HashBucket *searchHashTable(HashBucket **hashTable, char *specId);
+SpecNode *searchHashTable(HashTable *hashTable, char *specId);
+
+SpecNode *searchChain(SpecNode *head, char *specId);
+
+void printAllMatches(HashTable *hashTable, FILE *fptr);
+
+void printSpecMatchesInChain(SpecNode *head, FILE *fptr);
+
+void printVisitedSpecNodesCount();
 
 void freeSpecNode(SpecNode *specNode);
 
 void freeHashBucket(HashBucket *hashBucket);
 
-void freeHashTable(HashBucket **hashTable);
+void freeHashTable(HashTable *hashTable);
+
+int closestPrime(int num);
+
+void printHashingBenchmarks();
 
 #endif

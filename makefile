@@ -1,15 +1,15 @@
 # This makefile builds and manages the project.
 
 PROGRAM_NAME = main
-DATASET_X = Datasets/2013_camera_specs
-DATASET_W = Datasets/sigmod_medium_labelled_dataset.csv
+DATASET_X = ./Datasets/2013_camera_specs/
+DATASET_W = ./Datasets/sigmod_medium_labelled_dataset.csv
 
 # Compilation flags
 CFLAGS  = -std=gnu99
 CFLAGS += -g
 CFLAGS += -Wall
-CFLAGS += -Wextra
-CFLAGS += -pedantic
+#CFLAGS += -Wextra
+#CFLAGS += -pedantic
 #CFLAGS += -Werror
 
 # Test flags
@@ -71,13 +71,15 @@ cl: clobber
 
 .PHONY: run
 run: clean build
-	./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
+	@valgrind $(VFLAGS) ./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
+	@echo "Memory check passed"
 .PHONY: r
 r: run
 
 .PHONY: test
 test: build/test
-	./build/test
+	@valgrind $(VFLAGS) ./build/test
+	@echo "Memory check passed"
 PHONY: t
 t: test
 
