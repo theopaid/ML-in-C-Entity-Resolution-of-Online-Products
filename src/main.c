@@ -14,6 +14,8 @@ int main(int argc, char **argv)
 
   read_from_dir(DATASET_PATH, hashTable);
 
+  print_cliques(hashTable);
+
   /*SpecInfo *spec = initSpecInfo("hello", "world");
   printf("%s\n", spec->specId);
   printf("%s\n", spec->pageTitle);*/
