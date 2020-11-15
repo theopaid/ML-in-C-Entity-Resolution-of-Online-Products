@@ -3,8 +3,11 @@
 
 #include "../hdr/initial.h"
 
+void test_spec();
+void test_reading();
 void test_hashing();
 void test_clique();
+
 
 void setUp(void)
 {
@@ -21,8 +24,11 @@ void test_hello(void)
 
 int main(void)
 {
-   test_hashing();
-   test_clique();
+  test_reading();
+  test_spec();
+  test_hashing();
+  test_clique();
+
    return 0;
 }
 
