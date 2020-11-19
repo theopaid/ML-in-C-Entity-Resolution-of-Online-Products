@@ -51,7 +51,7 @@ m: memcheck
 .PHONY: build
 build: $(SOURCE)
 	mkdir -p build
-	$(CC) $(CC_FLAGS) $(SOURCE) $(MAIN) -o ./build/$(PROGRAM_NAME)
+	$(CC) $(CFLAGS) $(SOURCE) $(MAIN) -o ./build/$(PROGRAM_NAME)
 	@echo " "
 	@echo "---- Run: ./build/main -x [dataset X folder] -w [dataset W file.csv] ----"
 .PHONY: b
