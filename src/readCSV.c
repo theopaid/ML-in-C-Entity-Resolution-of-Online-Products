@@ -33,6 +33,10 @@ void readDictionary(char *fileName, HashTable *hashTable)
         {
             updateCliques(getField(tmp2, 1), getField(tmp3, 2), hashTable);
         }
+        else
+        {
+            updateMissMatchCliques(getField(tmp2, 1), getField(tmp3, 2), hashTable);
+        }
 
         free(tmp1);
         free(tmp2);

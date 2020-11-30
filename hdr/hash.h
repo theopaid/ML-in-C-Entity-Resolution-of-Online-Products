@@ -42,6 +42,10 @@ void printAllMatches(HashTable *hashTable, FILE *fptr);
 
 void printSpecMatchesInChain(SpecNode *head, FILE *fptr);
 
+void printAllMissMatches(HashTable *hashTable, FILE *fptr);
+
+void printSpecMissMatchesInChain(SpecNode *head, FILE *fptr);
+
 void printVisitedSpecNodesCount();
 
 void freeSpecNode(SpecNode *specNode);

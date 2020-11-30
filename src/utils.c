@@ -62,6 +62,7 @@ void printInsights()
     puts(" ");
     printHashingBenchmarks();
     printMatchesCount();
+    printMissMatchesCount();
     printVisitedSpecNodesCount();
     printExecTime();
     puts(" ");

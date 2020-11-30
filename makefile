@@ -60,7 +60,7 @@ b: build
 .PHONY: clean
 clean:
 	rm -rf *.o *.out *.out.dSYM tmp*
-.PHONY: c
+.PHONY: ccd
 c: clean
 
 .PHONY: clobber

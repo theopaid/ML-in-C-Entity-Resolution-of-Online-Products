@@ -27,7 +27,17 @@ int main(int argc, char **argv)
   {
     printf("Could not open file");
   }
+  FILE *fptr_miss = fopen("./output/miss_matches.txt", "w");
+  if (fptr_miss == NULL)
+  {
+    printf("Could not open file");
+  }
+
+  puts("------ MATCHES ------");
   printAllMatches(hashTable, fptr);
+  puts("------ MISS MATCHES ------");
+  printAllMissMatches(hashTable, fptr_miss);
+
   resetAllPrintedStatus(hashTable);
 
   fclose(fptr);
