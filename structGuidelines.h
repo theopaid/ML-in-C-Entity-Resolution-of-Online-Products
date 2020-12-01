@@ -26,6 +26,12 @@ typedef struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα
     int isPrinted;
 };
 
+typedef struct MissMatchNode
+{
+    CliqueNode *cliqueNode;
+    MissMatchNode *next;
+};
+
 typedef struct SpecInfo
 {
     char *specId;

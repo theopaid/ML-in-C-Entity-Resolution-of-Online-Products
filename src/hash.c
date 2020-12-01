@@ -153,6 +153,29 @@ void printSpecMatchesInChain(SpecNode *head, FILE *fptr)
     }
 }
 
+void printAllMissMatches(HashTable *hashTable, FILE *fptr)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        printSpecMissMatchesInChain(hashTable->hashArray[i]->specList, fptr);
+    }
+}
+
+void printSpecMissMatchesInChain(SpecNode *head, FILE *fptr)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        printSpecMissMatches(specPtr, fptr);
+        specPtr->cliquePtr->hasPrintedMissMatches = 1;
+        specPtr = specPtr->nextSpec;
+    }
+}
+
 void printVisitedSpecNodesCount()
 {
     printf("Visited Spec nodes: %d\n", specNodesVisited);
