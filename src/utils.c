@@ -40,10 +40,7 @@ void *safe_realloc(void *ptr, size_t size)
 
 char *createString(char *string)
 {
-    char *stringNew = safe_malloc(sizeof(char) * (strlen(string) + 1));
-    strcpy(stringNew, string);
-
-    return stringNew;
+    return strdup(string);
 }
 
 int validArgs(int argc, char *argv[])
@@ -73,6 +70,16 @@ void getArgs(char **datasetX, char **datasetY, char *argv[])
             *datasetY = argv[i + 1];
         }
     }
+}
+
+FILE *open_file(char *fileName)
+{
+    FILE *fptr = fopen(fileName, "w");
+    if (fptr == NULL)
+    {
+        printf("Could not open file");
+    }
+    return fptr;
 }
 
 void printInsights()

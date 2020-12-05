@@ -22,12 +22,20 @@ void test_vectorPushBack(void)
     freeVector(vector);
 }
 
+void test_csvToVector(void)
+{
+    Vector *vector = readCsvToVector("./Datasets/stopwords.csv");
+    TEST_ASSERT_EQUAL_STRING("cannot", vectorGet(vector, 22));
+    freeVector(vector);
+}
+
 void test_vector()
 {
     UnityBegin("../test/test_vector.c");
 
     RUN_TEST(test_initVector);
     RUN_TEST(test_vectorPushBack);
+    RUN_TEST(test_csvToVector);
 
     UnityEnd();
 }
