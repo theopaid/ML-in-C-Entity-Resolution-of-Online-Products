@@ -20,5 +20,6 @@
 #include "readCSV.h"
 
 #include "printing_cliques.h"
+#include "vectorImpl.h"
 
 #endif

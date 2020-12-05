@@ -26,6 +26,26 @@ void *safe_calloc(long elementsNum, size_t size)
     return ptr;
 }
 
+void *safe_realloc(void *ptr, size_t size)
+{
+    void *ptrNew = realloc(ptr, size);
+    if (ptrNew == NULL)
+    {
+        perror("realloc failed!");
+        exit(EXIT_FAILURE);
+    }
+
+    return ptrNew;
+}
+
+char *createString(char *string)
+{
+    char *stringNew = safe_malloc(sizeof(char) * (strlen(string) + 1));
+    strcpy(stringNew, string);
+
+    return stringNew;
+}
+
 int validArgs(int argc, char *argv[])
 {
 
