@@ -45,3 +45,27 @@ void readDictionary(char *fileName, HashTable *hashTable)
 
     fclose(stream);
 }
+
+Vector *readCsvToVector(char *fileName)
+{
+    FILE *stream = fopen(fileName, "r");
+    if (stream == NULL)
+    {
+        printf("Could not create %s\n", fileName);
+        exit(EXIT_FAILURE);
+    }
+
+    Vector *vector = vectorInit();
+    char line[MAXLINE];
+    char *nextField = NULL;
+    while (fgets(line, MAXLINE, stream))
+    {
+        for (nextField = strtok(line, ","); nextField != NULL; nextField = strtok(NULL, ","))
+        {
+            vectorPushBack(vector, createString(nextField));
+        }
+    }
+
+    fclose(stream);
+    return vector;
+}

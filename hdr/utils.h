@@ -15,6 +15,8 @@ int validArgs(int argc, char *argv[]);
 
 void getArgs(char **datasetX, char **datasetY, char *argv[]);
 
+FILE *open_file(char *fileName);
+
 void printInsights();
 
 #endif

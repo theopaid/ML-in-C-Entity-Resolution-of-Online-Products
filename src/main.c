@@ -22,16 +22,8 @@ int main(int argc, char **argv)
   read_from_dir(datasetX, hashTable);
   readDictionary(datasetW, hashTable);
 
-  FILE *fptr = fopen("./output/matches.txt", "w");
-  if (fptr == NULL)
-  {
-    printf("Could not open file");
-  }
-  FILE *fptr_miss = fopen("./output/miss_matches.txt", "w");
-  if (fptr_miss == NULL)
-  {
-    printf("Could not open file");
-  }
+  FILE *fptr = open_file("./output/matches.txt");
+  FILE *fptr_miss = open_file("./output/miss_matches.txt");
 
   puts("------ MATCHES ------");
   printAllMatches(hashTable, fptr);
@@ -41,7 +33,12 @@ int main(int argc, char **argv)
   resetAllPrintedStatus(hashTable);
 
   fclose(fptr);
+  fclose(fptr_miss);
+
+  Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
+
   freeHashTable(hashTable);
+  freeVector(stopwords);
 
   clock_t end = clock();
   timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
