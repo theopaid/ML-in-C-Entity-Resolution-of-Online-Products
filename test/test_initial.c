@@ -5,7 +5,7 @@ void test_spec();
 void test_reading();
 void test_hashing();
 void test_clique();
-
+void test_vector();
 
 void setUp(void)
 {
@@ -22,8 +22,9 @@ int main(void)
   test_spec();
   test_hashing();
   test_clique();
+  test_vector();
 
-   return 0;
+  return 0;
 }
 
 void printExecTime()

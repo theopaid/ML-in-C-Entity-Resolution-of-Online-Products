@@ -111,7 +111,7 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
             continue;
         }
         matchesFound++;
-        printf("%s,%s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
+        printf("%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         if (fptr != NULL)
             fprintf(fptr, "%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         cliquePtr = cliquePtr->next;
