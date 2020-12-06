@@ -7,6 +7,7 @@
 #include <time.h>
 #include <errno.h>
 #include <dirent.h>
+#include <ctype.h>
 
 #include "utils.h"
 #include "spec.h"
@@ -21,5 +22,6 @@
 
 #include "printing_cliques.h"
 #include "vectorImpl.h"
+#include "MLoriented.h"
 
 #endif

@@ -17,7 +17,7 @@ void *safe_calloc(long elementsNum, size_t size)
 {
     void *ptr = calloc(elementsNum, size);
 
-    if (!ptr && (size > 0) && (elementsNum > 0))
+    if (ptr == NULL || size <= 0 || elementsNum <= 0)
     {
         perror("calloc failed!");
         exit(EXIT_FAILURE);
@@ -40,7 +40,17 @@ void *safe_realloc(void *ptr, size_t size)
 
 char *createString(char *string)
 {
-    return strdup(string);
+    char *newString = safe_malloc(sizeof(char) * (strlen(string) + 1));
+    strcpy(newString, string);
+    return newString;
+}
+
+int same_string(char *string1, char *string2)
+{
+    if (strcmp(string1, string2) == 0)
+        return 1;
+    else
+        return 0;
 }
 
 int validArgs(int argc, char *argv[])
