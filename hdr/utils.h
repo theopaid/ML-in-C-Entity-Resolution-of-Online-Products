@@ -11,6 +11,8 @@ void *safe_realloc(void *ptr, size_t size);
 
 char *createString(char *string);
 
+int same_string(char *string1, char *string2);
+
 int validArgs(int argc, char *argv[]);
 
 void getArgs(char **datasetX, char **datasetY, char *argv[]);

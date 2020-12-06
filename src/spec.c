@@ -14,6 +14,7 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
   newSpec->pageTitle = (char *)safe_malloc(strlen(title) + 1);
   strcpy(newSpec->pageTitle, title);
   newSpec->infoList = NULL;
+  newSpec->vectorMLinfo = vectorInit();
   return newSpec;
 }
 
@@ -27,13 +28,12 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
 
 void freeInfoNode(InfoNode *infoNode)
 {
-    if (infoNode == NULL)
-        return;
-    free(infoNode->description);
-    free(infoNode->content);
-    freeInfoNode(infoNode->next);
-    free(infoNode);
-
+  if (infoNode == NULL)
+    return;
+  free(infoNode->description);
+  free(infoNode->content);
+  freeInfoNode(infoNode->next);
+  free(infoNode);
 }
 
 void freeInfoList(InfoList *infoList)
