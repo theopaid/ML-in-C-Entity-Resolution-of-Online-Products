@@ -35,4 +35,8 @@ int incrementIfAlreadyInBOW(Vector *vectorMLinfo, char *word);
 
 void copyToEmptyVector(Vector *dstVector, Vector *srcVector);
 
+void printBOW(SpecInfo *specInfo);
+
+void freeMLinfo(Vector *vectorMLinfo);
+
 #endif

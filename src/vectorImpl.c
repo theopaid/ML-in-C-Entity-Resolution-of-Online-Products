@@ -24,6 +24,8 @@ void vectorResize(Vector *vector, int capacity)
         return;
 
     vector->items = safe_realloc(vector->items, sizeof(void *) * capacity);
+    vector->capacity = capacity;
+    //printf("NEW CAP: %d\n", vector->capacity);
 }
 
 void vectorPushBack(Vector *vector, void *item)
@@ -33,6 +35,7 @@ void vectorPushBack(Vector *vector, void *item)
 
     if (vector->itemsInserted == vector->capacity) // capacity reached, let's double it's size
     {
+        //puts("RESIZED-----------");
         vectorResize(vector, vector->capacity * 2);
     }
     vector->items[vector->itemsInserted++] = item;
