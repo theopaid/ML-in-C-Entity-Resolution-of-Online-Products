@@ -46,7 +46,7 @@ void freeInfoList(InfoList *infoList)
 
 void add_newInfo_toSpec(SpecInfo *spec, char *desc, char *info)
 {
-  if (desc == NULL || info == NULL)
+  if (desc == NULL || info == NULL || spec == NULL)
   {
     printf("Error: adding null info\n");
     return;
@@ -124,7 +124,7 @@ void print_spec(SpecInfo *spec)
     printf("UNINITIALIZED SPEC\n");
     return;
   }
-  //printf("\tSPEC:\t%s\n\t\tTITLE:\t%s\n", spec->specId, spec->pageTitle);
+  printf("\tSPEC:\t%s\n\t\tTITLE:\t%s\n", spec->specId, spec->pageTitle);
 
   print_info_list(spec->infoList);
   return;
@@ -154,5 +154,7 @@ void freeSpecInfo(SpecInfo *specInfo)
   free(specInfo->specId);
   free(specInfo->pageTitle);
   freeInfoList(specInfo->infoList);
+  freeMLinfo(specInfo->vectorMLinfo);
+  freeVector(specInfo->vectorMLinfo);
   free(specInfo);
 }

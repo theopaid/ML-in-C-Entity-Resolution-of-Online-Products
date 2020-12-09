@@ -1,5 +1,6 @@
 #include "../hdr/includes.h"
 
+int countPrintedSpecs = 0;
 /**
  * For Benchmarking use only!
  * */
@@ -172,6 +173,31 @@ void printSpecMissMatchesInChain(SpecNode *head, FILE *fptr)
     {
         printSpecMissMatches(specPtr, fptr);
         specPtr->cliquePtr->hasPrintedMissMatches = 1;
+        specPtr = specPtr->nextSpec;
+    }
+}
+
+void printHashTable(HashTable *hashTable)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        printSpecChain(hashTable->hashArray[i]->specList);
+    }
+    printf("PRINTED SPECS: %d\n", countPrintedSpecs);
+    countPrintedSpecs = 0;
+}
+
+void printSpecChain(SpecNode *head)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        countPrintedSpecs++;
+        print_spec(specPtr->cliquePtr->specInfo);
         specPtr = specPtr->nextSpec;
     }
 }

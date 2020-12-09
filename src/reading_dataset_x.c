@@ -85,9 +85,9 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
             else
             {
               // Time to read the spec
-              SpecInfo *new_spec;
+              SpecInfo *new_spec = NULL;
               const char s[2] = "\"";
-              char *description;
+              char *description = NULL;
 
               if (fgets(line, 10000, dataset_x) == NULL)
               {

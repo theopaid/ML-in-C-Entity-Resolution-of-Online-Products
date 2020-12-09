@@ -42,8 +42,16 @@ void initMLinChain(SpecNode *head)
 void initMLforSpec(SpecNode *specNode)
 {
     SpecInfo *specInfo = specNode->cliquePtr->specInfo;
-    //if (lastMLVector != NULL)
-    //copyToEmptyVector(specInfo->vectorMLinfo, lastMLVector);
+    if (specInfo == NULL)
+        return;
+    //printf("nai: %s\n", specInfo->specId);
+    if (lastMLVector != NULL)
+    {
+        //printf("last vector last word: %s\n", ((MLInfo *)lastMLVector->items[vectorItemsCount(lastMLVector) - 1])->word);
+        //puts(" ");
+        //printf("specId: %s\n", specInfo->specId);
+        copyToEmptyVector(specInfo->vectorMLinfo, lastMLVector);
+    }
     populateBOW(specInfo);
 }
 
@@ -55,16 +63,22 @@ void populateBOW(SpecInfo *specInfo)
     traverseInfoList(specInfo->vectorMLinfo, specInfo->infoList);
 
     lastMLVector = specInfo->vectorMLinfo;
+    puts("-----------------------------------");
+    printBOW(specInfo);
+    puts("-----------------------------------");
 }
 
 void extractWordAndProcess(Vector *vectorMLinfo, char *sentence)
 {
-    char delim[9] = {
+    char delim[12] = {
         ' ',
         ',',
         '.',
         ':',
         '\n',
+        '&',
+        '\\',
+        '|',
         '/',
         '-',
         '(',
@@ -115,8 +129,11 @@ int isInStopwords(char *word)
 
 void addWordToBOW(Vector *vectorMLinfo, char *word)
 {
+    //printf("Adding: %s\n", word);
     if (incrementIfAlreadyInBOW(vectorMLinfo, word))
+    {
         return;
+    }
 
     MLInfo *newMLinfo = initMLinfo(word);
     newMLinfo->bow = 1;
@@ -131,20 +148,44 @@ int incrementIfAlreadyInBOW(Vector *vectorMLinfo, char *word)
         if (same_string(word, ((MLInfo *)vectorMLinfo->items[i])->word))
         {
             ((MLInfo *)vectorMLinfo->items[i])->bow++;
+            //printf("found again for: %s , %s\n", ((MLInfo *)vectorMLinfo->items[i])->word, word);
+            //printf("count now: %d\n", ((MLInfo *)vectorMLinfo->items[i])->bow);
             return 1;
         }
     }
+    //printf("not found: %s\n", word);
     return 0;
 }
 
 void copyToEmptyVector(Vector *dstVector, Vector *srcVector)
 {
     if (dstVector == NULL || srcVector == NULL || vectorItemsCount(dstVector) != 0)
+    {
         return;
-
+    }
     int srcItemsCount = vectorItemsCount(srcVector);
     for (int i = 0; i < srcItemsCount; i++)
     {
-        dstVector->items[i] = initMLinfo(((MLInfo *)srcVector->items[i])->word);
+        vectorPushBack(dstVector, initMLinfo(((MLInfo *)srcVector->items[i])->word));
+    }
+}
+
+void printBOW(SpecInfo *specInfo)
+{
+    Vector *vectorML = specInfo->vectorMLinfo;
+    int count = vectorItemsCount(vectorML);
+    printf("specId: %s\n", specInfo->specId);
+    for (int i = 0; i < count; i++)
+    {
+        printf("%s : %d | ", ((MLInfo *)vectorML->items[i])->word, ((MLInfo *)vectorML->items[i])->bow);
+    }
+}
+
+void freeMLinfo(Vector *vectorMLinfo)
+{
+    int count = vectorItemsCount(vectorMLinfo);
+    for (int i = 0; i < count; i++)
+    {
+        free(((MLInfo *)vectorMLinfo->items[i])->word);
     }
 }
