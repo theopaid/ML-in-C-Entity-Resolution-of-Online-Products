@@ -1,4 +1,5 @@
 #include "../hdr/includes.h"
+int specsInitiated = 0;
 
 Vector *lastMLVector;
 Vector *stopWords;
@@ -27,6 +28,7 @@ void initML(HashTable *hashTable, Vector *stopWords)
         initMLinChain(hashTable->hashArray[i]->specList);
     }
     lastMLVector = NULL;
+    specsInitiated = 0;
 }
 
 void initMLinChain(SpecNode *head)
@@ -34,6 +36,9 @@ void initMLinChain(SpecNode *head)
     SpecNode *specPtr = head;
     while (specPtr != NULL)
     {
+        printf("SPEC: %s\n", specPtr->cliquePtr->specInfo->specId);
+        specsInitiated++;
+        printf("spec num: %d\n", specsInitiated);
         initMLforSpec(specPtr);
         specPtr = specPtr->nextSpec;
     }
@@ -64,7 +69,7 @@ void populateBOW(SpecInfo *specInfo)
 
     lastMLVector = specInfo->vectorMLinfo;
     puts("-----------------------------------");
-    printBOW(specInfo);
+    //printBOW(specInfo);
     puts("-----------------------------------");
 }
 

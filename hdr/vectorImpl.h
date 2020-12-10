@@ -26,4 +26,6 @@ void *vectorGet(Vector *vector, int index);
 
 void freeVector(Vector *vector);
 
+void freeVectorWithoutItems(Vector *vector);
+
 #endif
