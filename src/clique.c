@@ -9,7 +9,7 @@ CliqueNode *initCliqueNode()
     newCliqueNode->specInfo = NULL;
     newCliqueNode->next = newCliqueNode; // we have a cyclic list
     newCliqueNode->prev = newCliqueNode;
-    newCliqueNode->missMatchList = NULL;
+    newCliqueNode->cliqueMissMatchVector = NULL;
     newCliqueNode->isPrinted = 0;
     newCliqueNode->hasPrintedMissMatches = 0;
 
@@ -45,6 +45,61 @@ void makeCliqueAdjustmnets(CliqueNode *leftClique, CliqueNode *rightClique)
     leftClique->next->prev = rightClique->prev;
     leftClique->next = rightClique;
     rightClique->prev = leftClique;
+    mergeCliqueMissMatchVectors(leftClique, rightClique);
+}
+
+void mergeCliqueMissMatchVectors(CliqueNode *leftClique, CliqueNode *rightClique)
+{
+    if (leftClique->cliqueMissMatchVector == NULL && rightClique->cliqueMissMatchVector == NULL)
+    {
+        Vector *newCliqueMissMatchVector = vectorInit();
+        leftClique->cliqueMissMatchVector = newCliqueMissMatchVector;
+        rightClique->cliqueMissMatchVector = newCliqueMissMatchVector;
+        return;
+    }
+    if (leftClique->cliqueMissMatchVector == NULL)
+    {
+        leftClique->cliqueMissMatchVector = rightClique->cliqueMissMatchVector;
+        return;
+    }
+    if (rightClique->cliqueMissMatchVector == NULL)
+    {
+        rightClique->cliqueMissMatchVector = leftClique->cliqueMissMatchVector;
+        return;
+    }
+    Vector *newMergedMissMatchVector = vectorInit();
+    copyToEmptyMissMatchVector(newMergedMissMatchVector, leftClique->cliqueMissMatchVector);
+    int newVectorItemsCount = vectorItemsCount(newMergedMissMatchVector);
+    int leftVectorItemsCount = vectorItemsCount(leftClique->cliqueMissMatchVector);
+    int alreadyInVector = 0;
+    for (int i = 0; i < leftVectorItemsCount; i++)
+    {
+        alreadyInVector = 0;
+        char *specIdToBeMerged = ((CliqueNode *)leftClique->cliqueMissMatchVector->items[i])->specInfo->specId;
+        for (int j = 0; j < newVectorItemsCount; j++)
+        {
+            char *specIdInNewVector = ((CliqueNode *)newMergedMissMatchVector->items[j])->specInfo->specId;
+            if (same_string(specIdToBeMerged, specIdInNewVector))
+            {
+                alreadyInVector = 1;
+                break;
+            }
+        }
+        if (alreadyInVector == 0)
+        {
+            vectorPushBack(newMergedMissMatchVector, leftClique->cliqueMissMatchVector->items[i]);
+        }
+    }
+
+    freeVectorWithoutItems(leftClique->cliqueMissMatchVector);
+    freeVectorWithoutItems(rightClique->cliqueMissMatchVector);
+    leftClique->cliqueMissMatchVector = newMergedMissMatchVector;
+    CliqueNode *tmpCliqueNode = leftClique->next;
+    while (strcmp(tmpCliqueNode->specInfo->specId, leftClique->specInfo->specId) != 0)
+    {
+        tmpCliqueNode->cliqueMissMatchVector = newMergedMissMatchVector;
+        tmpCliqueNode = tmpCliqueNode->next;
+    }
 }
 
 void updateMissMatchCliques(char *leftSpecId, char *rightSpecId, HashTable *hashTable)
@@ -53,42 +108,30 @@ void updateMissMatchCliques(char *leftSpecId, char *rightSpecId, HashTable *hash
     CliqueNode *rightClique = getCliqueNode(rightSpecId, hashTable);
     if (leftClique == NULL || rightClique == NULL)
         return;
-    updateMissMatchList(leftClique, rightClique);
-    updateMissMatchList(rightClique, leftClique);
+    updateMissMatchVector(leftClique, rightClique);
+    updateMissMatchVector(rightClique, leftClique);
 }
 
-void updateMissMatchList(CliqueNode *srcClique, CliqueNode *missMatchClique)
+void updateMissMatchVector(CliqueNode *srcClique, CliqueNode *missMatchClique)
 {
-    MissMatchNode *tmpNode = srcClique->missMatchList;
-    if (tmpNode == NULL)
+    Vector *cliqueMissMatchVector = srcClique->cliqueMissMatchVector;
+    if (cliqueMissMatchVector == NULL)
     {
-        MissMatchNode *newMissMatchNode = createMissMatchNode(missMatchClique);
-        srcClique->missMatchList = newMissMatchNode;
+        Vector *newMissMatchVector = vectorInit();
+        vectorPushBack(newMissMatchVector, missMatchClique);
+        srcClique->cliqueMissMatchVector = newMissMatchVector;
         return;
     }
-    while (tmpNode->next != NULL)
+    int itemsCount = vectorItemsCount(srcClique->cliqueMissMatchVector);
+    for (int i = 0; i < itemsCount; i++)
     {
-        if (strcmp(tmpNode->cliqueNode->specInfo->specId, missMatchClique->specInfo->specId) == 0)
-        // Check if miss match already exists for clique node
-        {
+        char *currentSpecId = ((CliqueNode *)srcClique->cliqueMissMatchVector->items[i])->specInfo->specId;
+        if (same_string(currentSpecId, missMatchClique->specInfo->specId))
+        { // Vector already contains this miss match
             return;
         }
-        tmpNode = tmpNode->next;
     }
-    if (strcmp(tmpNode->cliqueNode->specInfo->specId, missMatchClique->specInfo->specId) == 0)
-    {
-        return;
-    }
-    MissMatchNode *newMissMatchNode = createMissMatchNode(missMatchClique);
-    tmpNode->next = newMissMatchNode;
-}
-
-MissMatchNode *createMissMatchNode(CliqueNode *missMatchClique)
-{
-    MissMatchNode *newMissMatchNode = safe_malloc(sizeof(MissMatchNode));
-    newMissMatchNode->cliqueNode = missMatchClique;
-    newMissMatchNode->next = NULL;
-    return newMissMatchNode;
+    vectorPushBack(srcClique->cliqueMissMatchVector, missMatchClique);
 }
 
 void removeFromClique(CliqueNode *cliqueNode)
@@ -121,19 +164,21 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
 void printSpecMissMatches(SpecNode *specNode, FILE *fptr)
 {
     CliqueNode *cliquePtr = specNode->cliquePtr;
-    MissMatchNode *tmpNode = cliquePtr->missMatchList;
-    while (tmpNode != NULL)
+    Vector *cliqueMissMatchVector = cliquePtr->cliqueMissMatchVector;
+    int itemsCount = vectorItemsCount(cliqueMissMatchVector);
+    for (int i = 0; i < itemsCount; i++)
     {
-        if (tmpNode->cliqueNode->hasPrintedMissMatches == 1)
+        CliqueNode *missMatchCliqueNode = (CliqueNode *)cliqueMissMatchVector->items[i];
+        if (missMatchCliqueNode->hasPrintedMissMatches == 1)
         {
-            tmpNode = tmpNode->next;
             continue;
         }
         missMatchesFound++;
-        printf("%s,%s\n", cliquePtr->specInfo->specId, tmpNode->cliqueNode->specInfo->specId);
+        printf("%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
         if (fptr != NULL)
-            fprintf(fptr, "%s , %s\n", cliquePtr->specInfo->specId, tmpNode->cliqueNode->specInfo->specId);
-        tmpNode = tmpNode->next;
+        {
+            fprintf(fptr, "%s , %s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
+        }
     }
 }
 
@@ -152,6 +197,19 @@ int alreadyInSameClique(CliqueNode *leftCliqueNode, CliqueNode *rightCliqueNode)
     }
 
     return 0;
+}
+
+void copyToEmptyMissMatchVector(Vector *dstVector, Vector *srcVector)
+{
+    if (dstVector == NULL || srcVector == NULL || vectorItemsCount(dstVector) != 0)
+    {
+        return;
+    }
+    int srcItemsCount = vectorItemsCount(srcVector);
+    for (int i = 0; i < srcItemsCount; i++)
+    {
+        vectorPushBack(dstVector, srcVector->items[i]);
+    }
 }
 
 void resetAllPrintedStatus(HashTable *hashTable)
@@ -192,14 +250,27 @@ void freeCliqueNode(CliqueNode *cliqueNode)
     if (cliqueNode == NULL)
         return;
     freeSpecInfo(cliqueNode->specInfo);
-    freeMissMatchNode(cliqueNode->missMatchList);
     free(cliqueNode);
 }
 
-void freeMissMatchNode(MissMatchNode *missMatchNode)
+void freeMissMatchVector(HashBucket *hashBucket)
 {
-    if (missMatchNode == NULL)
+    if (hashBucket == NULL)
         return;
-    freeMissMatchNode(missMatchNode->next);
-    free(missMatchNode);
+
+    SpecNode *currentSpecNode = hashBucket->specList;
+    CliqueNode *currentCliqueNode;
+    while (currentSpecNode != NULL)
+    {
+        currentCliqueNode = currentSpecNode->cliquePtr;
+        CliqueNode *tmpCliqueNode = currentCliqueNode->next;
+        while (strcmp(tmpCliqueNode->specInfo->specId, currentCliqueNode->specInfo->specId) != 0)
+        {
+            tmpCliqueNode->cliqueMissMatchVector = NULL;
+            tmpCliqueNode = tmpCliqueNode->next;
+        }
+        freeVectorWithoutItems(currentCliqueNode->cliqueMissMatchVector);
+
+        currentSpecNode = currentSpecNode->nextSpec;
+    }
 }

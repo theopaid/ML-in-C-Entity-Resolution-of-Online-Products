@@ -28,6 +28,7 @@ void *safe_calloc(long elementsNum, size_t size)
 
 void *safe_realloc(void *ptr, size_t size)
 {
+    //printf("size: %ld\n", size);
     void *ptrNew = realloc(ptr, size);
     if (ptrNew == NULL)
     {

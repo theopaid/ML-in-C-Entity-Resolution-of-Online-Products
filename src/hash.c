@@ -232,6 +232,10 @@ void freeHashTable(HashTable *hashTable)
         return;
     for (int i = 0; i < hashTable->size; i++)
     {
+        freeMissMatchVector(hashTable->hashArray[i]);
+    }
+    for (int i = 0; i < hashTable->size; i++)
+    {
         freeHashBucket(hashTable->hashArray[i]);
     }
     free(hashTable->hashArray);
