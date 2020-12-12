@@ -18,6 +18,39 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
   return newSpec;
 }
 
+SpecInfo *initSpecInfoEmpt(char *site, char *id) {
+  SpecInfo *newSpec = (SpecInfo *)safe_malloc(sizeof(SpecInfo));
+  char *json_stripped_id = (char *)safe_malloc(strlen(id) - 4);
+  strncpy(json_stripped_id, id, strlen(id) - 5);
+  json_stripped_id[strlen(id) - 5] = 0;
+  newSpec->specId = (char *)safe_malloc(strlen(site) + strlen(json_stripped_id) + 3);
+  strcpy(newSpec->specId, site);
+  strcat(newSpec->specId, "//");
+  strcat(newSpec->specId, json_stripped_id);
+  free(json_stripped_id);
+  newSpec->pageTitle = NULL;
+  newSpec->infoList = NULL;
+  newSpec->vectorMLinfo = vectorInit();
+  return newSpec;
+}
+
+void add_pageTitle_toSpec(SpecInfo *spec, char *page_title) {
+  if ( spec == NULL || spec->specId == NULL || spec->pageTitle != NULL ) {
+    printf("Error: adding pagetitle to inappopriate spec (uninitialized or with pagetitle).\n");
+    return;
+  }
+  if ( page_title == NULL ) {
+      printf("Error: adding null page_title to spec\n");
+      return;
+  }
+
+  spec->pageTitle = (char *)safe_malloc(strlen(page_title) + 1);
+  strcpy(spec->pageTitle, page_title);
+  return;
+}
+
+
+
 // void unitSpecInfo(SpecInfo *spec)
 // {
 //     free(spec->specId);
@@ -46,12 +79,12 @@ void freeInfoList(InfoList *infoList)
 
 void add_newInfo_toSpec(SpecInfo *spec, char *desc, char *info)
 {
-  if (desc == NULL || info == NULL || spec == NULL)
+  if (desc == NULL || info == NULL || spec == NULL )
   {
     printf("Error: adding null info\n");
     return;
   }
-  if (spec->specId == NULL || spec->pageTitle == NULL)
+  if (spec->specId == NULL )
   {
     printf("Error: add to uninitialized spec\n");
     return;
