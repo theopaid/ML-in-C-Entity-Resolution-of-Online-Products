@@ -36,7 +36,7 @@ void vectorPushBack(Vector *vector, void *item)
     if (vector->itemsInserted == vector->capacity) // capacity reached, let's double it's size
     {
         //puts("RESIZED-----------");
-        vectorResize(vector, vector->capacity * 2);
+        vectorResize(vector, vector->capacity * 1.2);
     }
     vector->items[vector->itemsInserted++] = item;
 }
@@ -66,6 +66,15 @@ void freeVector(Vector *vector)
     {
         free(vector->items[i]);
     }
+    free(vector->items);
+    free(vector);
+}
+
+void freeVectorWithoutItems(Vector *vector)
+{
+    if (vector == NULL)
+        return;
+
     free(vector->items);
     free(vector);
 }

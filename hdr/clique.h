@@ -5,6 +5,7 @@
 
 typedef struct HashTable HashTable;
 typedef struct SpecNode SpecNode;
+typedef struct HashBucket HashBucket;
 
 typedef struct CliqueNode CliqueNode;
 typedef struct MissMatchNode MissMatchNode;
@@ -14,15 +15,10 @@ struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα. Αρχ
     SpecInfo *specInfo;
     CliqueNode *next;
     CliqueNode *prev;
-    MissMatchNode *missMatchList;
+    //MissMatchNode *missMatchList;
+    Vector *cliqueMissMatchVector;
     int isPrinted;
     int hasPrintedMissMatches;
-};
-
-struct MissMatchNode
-{
-    CliqueNode *cliqueNode;
-    MissMatchNode *next;
 };
 
 CliqueNode *initCliqueNode();
@@ -53,10 +49,12 @@ void freeCliqueNode(CliqueNode *cliqueNode);
 
 void updateMissMatchCliques(char *leftSpecId, char *rightSpecId, HashTable *hashTable);
 
-void updateMissMatchList(CliqueNode *srcClique, CliqueNode *missMatchClique);
+void freeMissMatchVector(HashBucket *hashBucket);
 
-MissMatchNode *createMissMatchNode(CliqueNode *missMatchClique);
+void copyToEmptyMissMatchVector(Vector *dstVector, Vector *srcVector);
 
-void freeMissMatchNode(MissMatchNode *missMatchNode);
+void mergeCliqueMissMatchVectors(CliqueNode *leftClique, CliqueNode *rightClique);
+
+void updateMissMatchVector(CliqueNode *srcClique, CliqueNode *missMatchClique);
 
 #endif
