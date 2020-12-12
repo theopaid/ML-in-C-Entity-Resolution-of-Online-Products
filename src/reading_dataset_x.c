@@ -143,8 +143,7 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
                       add_pageTitle_toSpec(new_spec, whole_title);
                       //new_spec = initSpecInfo(sites_folder->d_name, specs_folder->d_name, whole_title);
                       if ( clfl == 1) {
-                        bhy7jvgfq
-
+                        free(whole_title);
                       }
                       //free(whole_title);
                       continue;
