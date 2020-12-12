@@ -20,6 +20,7 @@ int main(int argc, char **argv)
     HashTable *hashTable = initHashTable(count_datafiles(datasetX));
 
     read_from_dir(datasetX, hashTable);
+
     readDictionary(datasetW, hashTable);
 
     FILE *fptr = open_file("./output/matches.txt");
@@ -35,14 +36,16 @@ int main(int argc, char **argv)
     fclose(fptr);
     fclose(fptr_miss);
 
+
     Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
     //initML(hashTable, stopwords);
     //printHashTable(hashTable);
     //SpecNode *tmpspecnode = searchHashTable(hashTable, "www.alibaba.com//23876");
     //print_spec(tmpspecnode->cliquePtr->specInfo);
 
+
     freeHashTable(hashTable);
-    freeVector(stopwords);
+    //freeVector(stopwords);
 
     clock_t end = clock();
     timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;

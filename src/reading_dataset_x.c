@@ -86,6 +86,7 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
             {
               // Time to read the spec
               SpecInfo *new_spec = NULL;
+              new_spec = initSpecInfoEmpt(sites_folder->d_name, specs_folder->d_name);
               const char s[2] = "\"";
               char *description = NULL;
 
@@ -112,19 +113,40 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
 
                 strtok(line, s);
                 description = strtok(NULL, s);
+
                 if (description != NULL)
                 {
                   //printf("%s\n", description);
                   if (strcmp(description, "<page title>") == 0)
                   {
-                    char *pageTitle;
+                    char *pageTitle = NULL;
+                    char *pageTitle_rest = NULL;
+                    char *whole_title;
+                    int clfl = 0;
                     strtok(NULL, s);
                     pageTitle = strtok(NULL, s);
+                    pageTitle_rest = strtok(NULL, s);
+                    //printf("%s\n", s);
+                    if ( strcmp(pageTitle_rest, ",\n") != 0 ) {
+                      whole_title = (char*)safe_malloc(sizeof(char)*(strlen(pageTitle_rest)+strlen(pageTitle)+1));
+                      strcpy(whole_title, pageTitle);
+                      strcat(whole_title, pageTitle_rest);
+                      clfl = 1;
+                    } else {
+                      whole_title = pageTitle;
+                    }
+                    //whole_title = pageTitle;
                     //pageTitle = strtok(pageTitle, "|-,"); // If we wanted to strip the title and keep only the "usefull" info
-                    if (pageTitle != NULL)
+                    if (whole_title != NULL)
                     {
-                      //printf("%s\n", pageTitle);
-                      new_spec = initSpecInfo(sites_folder->d_name, specs_folder->d_name, pageTitle);
+                      //printf("%s\n", whole_title);
+                      add_pageTitle_toSpec(new_spec, whole_title);
+                      //new_spec = initSpecInfo(sites_folder->d_name, specs_folder->d_name, whole_title);
+                      if ( clfl == 1) {
+                        bhy7jvgfq
+
+                      }
+                      //free(whole_title);
                       continue;
                     }
                   }

@@ -16,8 +16,10 @@ struct SpecInfo
 };
 
 SpecInfo *initSpecInfo(char *, char *, char *);
+SpecInfo *initSpecInfoEmpt(char *, char *);
 void unitSpecInfo(SpecInfo *);
 void add_newInfo_toSpec(SpecInfo *, char *, char *);
+void add_pageTitle_toSpec(SpecInfo *, char *);
 void print_spec(SpecInfo *);
 void print_info_list(InfoList *list);
 void add_newInfo_toList(InfoList *, char *, char *);
