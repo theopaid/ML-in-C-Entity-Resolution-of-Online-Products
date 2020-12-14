@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "utils.h"
 #include "spec.h"

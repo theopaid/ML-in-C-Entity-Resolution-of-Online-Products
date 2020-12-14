@@ -2,6 +2,7 @@
 #define _ML_H
 
 typedef struct MLInfo MLInfo;
+typedef struct idfInfo idfInfo;
 
 struct MLInfo
 {
@@ -9,6 +10,14 @@ struct MLInfo
     int bow;
     double tf_idf;
     double rog_reg;
+};
+
+struct idfInfo
+{
+    char *word;
+    double timesSeen;
+    int alreadySeenInSpecFlag;
+    double idfValue;
 };
 
 MLInfo *initMLinfo(char *string);
@@ -38,5 +47,29 @@ void copyToEmptyVector(Vector *dstVector, Vector *srcVector);
 void printBOW(SpecInfo *specInfo);
 
 void freeMLinfo(Vector *vectorMLinfo);
+
+idfInfo *initIDFinfo(char *string);
+
+void createIDFvector(HashTable *hashTable, Vector *stopwords);
+
+void initIDFinChain(SpecNode *head);
+
+void addSpecToIDF(SpecNode *specNode);
+
+void addWordToIDF(char *wordToBeInserted);
+
+void computeIDFvalues(Vector *idfVector);
+
+void addSentenceToIDF(char *sentence);
+
+void processWordAddToIDF(char *word);
+
+void traverseInfoListToIDF(InfoList *infoList);
+
+void printIDFvector(Vector *idfVector);
+
+void freeIDFinfo(Vector *idfVector);
+
+void resetIDFSeenFlags(Vector *idfVector);
 
 #endif

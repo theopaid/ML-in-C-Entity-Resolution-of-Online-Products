@@ -36,16 +36,15 @@ int main(int argc, char **argv)
     fclose(fptr);
     fclose(fptr_miss);
 
-
     Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
     //initML(hashTable, stopwords);
+    createIDFvector(hashTable, stopwords);
     //printHashTable(hashTable);
     //SpecNode *tmpspecnode = searchHashTable(hashTable, "www.alibaba.com//23876");
     //print_spec(tmpspecnode->cliquePtr->specInfo);
 
-
     freeHashTable(hashTable);
-    //freeVector(stopwords);
+    freeVector(stopwords);
 
     clock_t end = clock();
     timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
