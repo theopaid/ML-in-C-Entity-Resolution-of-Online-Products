@@ -5,6 +5,7 @@ double differentSpecs = 0.0;
 Vector *lastMLVector;
 Vector *stopWords;
 Vector *idfVector;
+Vector *tf_idfVector;
 
 MLInfo *initMLinfo(char *string)
 {
@@ -77,7 +78,7 @@ void populateBOW(SpecInfo *specInfo)
 
 void extractWordAndProcess(Vector *vectorMLinfo, char *sentence)
 {
-    char delim[12] = {
+    char delim[15] = {
         ' ',
         ',',
         '.',
@@ -90,6 +91,9 @@ void extractWordAndProcess(Vector *vectorMLinfo, char *sentence)
         '-',
         '(',
         ')',
+        '!',
+        '?',
+        '=',
     };
     char *ptr = strtok(sentence, delim);
     while (ptr != NULL)
@@ -202,6 +206,8 @@ idfInfo *initIDFinfo(char *string)
     idfInfo *newIDFinfo = safe_malloc(sizeof(idfInfo));
     newIDFinfo->word = createString(string);
     newIDFinfo->idfValue = 0.0;
+    newIDFinfo->tfSum = 0.0;
+    newIDFinfo->tf_idfValue = 0.0;
     newIDFinfo->timesSeen = 0.0;
     newIDFinfo->alreadySeenInSpecFlag = 0;
 
@@ -223,6 +229,9 @@ void createIDFvector(HashTable *hashTable, Vector *stopwords)
     }
     computeIDFvalues(idfVector);
     printIDFvector(idfVector);
+    //printf("idfVector size: %d\n", idfVector->itemsInserted);
+    //printf("first: %s , %f , %f\n", ((idfInfo *)vectorGet(idfVector, 2000))->word, ((idfInfo *)vectorGet(idfVector, 2000))->timesSeen, ((idfInfo *)vectorGet(idfVector, 2000))->idfValue);
+    computeTF_IDFvalues(hashTable, idfVector);
     freeIDFinfo(idfVector);
     freeVector(idfVector);
 }
@@ -232,9 +241,9 @@ void initIDFinChain(SpecNode *head)
     SpecNode *specPtr = head;
     while (specPtr != NULL)
     {
-        //printf("SPEC: %s\n", specPtr->cliquePtr->specInfo->specId);
+        printf("SPEC: %s\n", specPtr->cliquePtr->specInfo->specId);
         specsInitiated++;
-        //printf("spec num: %d\n", specsInitiated);
+        printf("spec num: %d\n", specsInitiated);
         addSpecToIDF(specPtr);
         specPtr = specPtr->nextSpec;
     }
@@ -247,24 +256,29 @@ void addSpecToIDF(SpecNode *specNode)
     SpecInfo *specInfo = specNode->cliquePtr->specInfo;
     if (specInfo == NULL)
         return;
-    processWordAddToIDF("page");
-    processWordAddToIDF("title");
-    addSentenceToIDF(specInfo->pageTitle);
-    traverseInfoListToIDF(specInfo->infoList);
+    Vector *tfVector = specInfo->tfVector;
+    processWordAddToIDF("page", tfVector);
+    processWordAddToIDF("title", tfVector);
+    addSentenceToIDF(specInfo->pageTitle, tfVector);
+    traverseInfoListToIDF(specInfo->infoList, tfVector);
+    computeTFvalue(tfVector);
 }
 
-void addWordToIDF(char *wordToBeInserted)
+void addWordToIDF(char *wordToBeInserted, Vector *tfVector)
 {
+    addWordToTF(wordToBeInserted, tfVector);
+
     int itemsCount = vectorItemsCount(idfVector);
+    char *currentWord;
     for (int i = 0; i < itemsCount; i++)
     {
-        char *currentWord = ((idfInfo *)vectorGet(idfVector, i))->word;
+        currentWord = ((idfInfo *)idfVector->items[i])->word;
         if (same_string(currentWord, wordToBeInserted))
         {
-            if (((idfInfo *)vectorGet(idfVector, i))->alreadySeenInSpecFlag == 0)
+            if (((idfInfo *)idfVector->items[i])->alreadySeenInSpecFlag == 0)
             {
-                ((idfInfo *)vectorGet(idfVector, i))->timesSeen++;
-                ((idfInfo *)vectorGet(idfVector, i))->alreadySeenInSpecFlag = 1;
+                ((idfInfo *)idfVector->items[i])->timesSeen++;
+                ((idfInfo *)idfVector->items[i])->alreadySeenInSpecFlag = 1;
             }
             return;
         }
@@ -275,29 +289,49 @@ void addWordToIDF(char *wordToBeInserted)
     vectorPushBack(idfVector, newIDFinfo);
 }
 
+void addWordToTF(char *wordToBeInserted, Vector *tfVector)
+{
+    int itemsCount = vectorItemsCount(tfVector);
+    char *currentWord;
+    for (int i = 0; i < itemsCount; i++)
+    {
+        currentWord = ((tfInfo *)tfVector->items[i])->word;
+        if (same_string(currentWord, wordToBeInserted))
+        {
+            ((tfInfo *)tfVector->items[i])->tfValue++;
+            return;
+        }
+    }
+
+    // if word was not found in TF-vector, add it
+    tfInfo *newTFinfo = initTFinfo(wordToBeInserted);
+    newTFinfo->tfValue = 1.0;
+    vectorPushBack(tfVector, newTFinfo);
+}
+
 void computeIDFvalues(Vector *idfVector)
 {
     int itemsCount = vectorItemsCount(idfVector);
     for (int i = 0; i < itemsCount; i++)
     {
-        ((idfInfo *)vectorGet(idfVector, i))->idfValue = log(differentSpecs / ((idfInfo *)vectorGet(idfVector, i))->timesSeen);
+        ((idfInfo *)idfVector->items[i])->idfValue = log(differentSpecs / ((idfInfo *)idfVector->items[i])->timesSeen);
     }
 }
 
 void printIDFvector(Vector *idfVector)
 {
-    puts("====================");
-    int itemsCount = vectorItemsCount(idfVector);
-    for (int i = 0; i < itemsCount; i++)
-    {
-        printf("%s : %f || ", ((idfInfo *)vectorGet(idfVector, i))->word, ((idfInfo *)vectorGet(idfVector, i))->idfValue);
-    }
-    puts("====================");
+    // puts("====================");
+    // int itemsCount = vectorItemsCount(idfVector);
+    // for (int i = 0; i < itemsCount; i++)
+    // {
+    //     printf("%s : %f || ", ((idfInfo *)idfVector->items[i])->word, ((idfInfo *)idfVector->items[i])->idfValue);
+    // }
+    // puts("====================");
 }
 
-void addSentenceToIDF(char *sentence)
+void addSentenceToIDF(char *sentence, Vector *tfVector)
 {
-    char delim[12] = {
+    char delim[15] = {
         ' ',
         ',',
         '.',
@@ -310,16 +344,19 @@ void addSentenceToIDF(char *sentence)
         '-',
         '(',
         ')',
+        '!',
+        '?',
+        '=',
     };
     char *ptr = strtok(sentence, delim);
     while (ptr != NULL)
     {
-        processWordAddToIDF(ptr);
+        processWordAddToIDF(ptr, tfVector);
         ptr = strtok(NULL, delim);
     }
 }
 
-void processWordAddToIDF(char *word)
+void processWordAddToIDF(char *word, Vector *tfVector)
 {
     char *wordCopy = createString(word);
     for (int i = 0; i < strlen(wordCopy); i++)
@@ -327,17 +364,17 @@ void processWordAddToIDF(char *word)
         wordCopy[i] = tolower(wordCopy[i]);
     }
     if (!isInStopwords(wordCopy))
-        addWordToIDF(wordCopy);
+        addWordToIDF(wordCopy, tfVector);
     free(wordCopy);
 }
 
-void traverseInfoListToIDF(InfoList *infoList)
+void traverseInfoListToIDF(InfoList *infoList, Vector *tfVector)
 {
     InfoNode *tmpInfoNode = infoList->head;
     while (tmpInfoNode != NULL)
     {
-        addSentenceToIDF(tmpInfoNode->description);
-        addSentenceToIDF(tmpInfoNode->content);
+        addSentenceToIDF(tmpInfoNode->description, tfVector);
+        addSentenceToIDF(tmpInfoNode->content, tfVector);
 
         tmpInfoNode = tmpInfoNode->next;
     }
@@ -348,7 +385,7 @@ void freeIDFinfo(Vector *idfVector)
     int count = vectorItemsCount(idfVector);
     for (int i = 0; i < count; i++)
     {
-        free(((idfInfo *)vectorGet(idfVector, i))->word);
+        free(((idfInfo *)idfVector->items[i])->word);
     }
 }
 
@@ -357,6 +394,121 @@ void resetIDFSeenFlags(Vector *idfVector)
     int itemsCount = vectorItemsCount(idfVector);
     for (int i = 0; i < itemsCount; i++)
     {
-        ((idfInfo *)vectorGet(idfVector, i))->alreadySeenInSpecFlag = 0;
+        ((idfInfo *)idfVector->items[i])->alreadySeenInSpecFlag = 0;
+    }
+}
+
+tfInfo *initTFinfo(char *string)
+{
+    tfInfo *newTFinfo = safe_malloc(sizeof(tfInfo));
+    newTFinfo->word = createString(string);
+    newTFinfo->tfValue = 0.0;
+
+    return newTFinfo;
+}
+
+void freeTFinfo(Vector *tfVector)
+{
+    int count = vectorItemsCount(idfVector);
+    for (int i = 0; i < count; i++)
+    {
+        //puts("freed in tf");
+        free(((tfInfo *)tfVector->items[i])->word);
+    }
+}
+
+void computeTFvalue(Vector *tfVector)
+{
+    int itemsCount = vectorItemsCount(tfVector);
+    double currentValue = 0.0;
+    for (int i = 0; i < itemsCount; i++)
+    {
+        currentValue = ((tfInfo *)tfVector->items[i])->tfValue;
+        ((tfInfo *)tfVector->items[i])->tfValue = currentValue / itemsCount;
+    }
+}
+
+void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector)
+{
+    SpecNode *specPtr = NULL;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        specPtr = hashTable->hashArray[i]->specList;
+        while (specPtr != NULL)
+        {
+            addTFvectorToIDF(specPtr->cliquePtr->specInfo->tfVector, idfVector);
+            specPtr = specPtr->nextSpec;
+        }
+    }
+    int itemsCount = vectorItemsCount(idfVector);
+    for (int j = 0; j < itemsCount; j++)
+    {
+        ((idfInfo *)idfVector->items[j])->tf_idfValue = (((idfInfo *)idfVector->items[j])->tfSum / specsInitiated) * ((idfInfo *)idfVector->items[j])->idfValue;
+    }
+    trimNitemsFromTF_IDF(idfVector, 3000);
+}
+
+void addTFvectorToIDF(Vector *tfVector, Vector *idfVector)
+{
+    int tfItemsCount = vectorItemsCount(tfVector);
+    int idfItemsCount = vectorItemsCount(idfVector);
+    char *currentTFword = NULL, *currentIDFword = NULL;
+    for (int i = 0; i < tfItemsCount; i++)
+    {
+        currentTFword = ((tfInfo *)tfVector->items[i])->word;
+        for (int j = 0; j < idfItemsCount; j++)
+        {
+            currentIDFword = ((idfInfo *)idfVector->items[j])->word;
+            if (same_string(currentTFword, currentIDFword))
+            {
+                ((idfInfo *)idfVector->items[j])->tfSum += ((tfInfo *)tfVector->items[i])->tfValue;
+                break;
+            }
+        }
+    }
+}
+
+tf_idfInfo *initTF_IDFinfo(char *string)
+{
+    tf_idfInfo *newTF_IDFinfo = safe_malloc(sizeof(tf_idfInfo));
+    newTF_IDFinfo->word = createString(string);
+    newTF_IDFinfo->tf_idfValue = 0.0;
+
+    return newTF_IDFinfo;
+}
+
+void trimNitemsFromTF_IDF(Vector *idfVector, int nItems)
+{
+    selectionSort(idfVector, nItems);
+    tf_idfVector = vectorInit();
+    for (int i = 0; i < nItems; i++)
+    {
+        tf_idfInfo *newTF_IDFinfo = initTF_IDFinfo(((idfInfo *)idfVector->items[i])->word);
+        newTF_IDFinfo->tf_idfValue = ((idfInfo *)idfVector->items[i])->tf_idfValue;
+        vectorPushBack(tf_idfVector, newTF_IDFinfo);
+        printf(" %s : %f || ", ((idfInfo *)idfVector->items[i])->word, ((idfInfo *)idfVector->items[i])->tf_idfValue);
+    }
+}
+
+void selectionSort(Vector *idfVector, int nItems)
+{
+    int i, j, min_idx;
+    int itemsCount = vectorItemsCount(idfVector);
+
+    // One by one move boundary of unsorted subarray
+    for (i = 0; i < itemsCount - 1; i++)
+    {
+        // Find the maximum element in unsorted array
+        min_idx = i;
+        for (j = i + 1; j < itemsCount; j++)
+            if (((idfInfo *)idfVector->items[j])->tf_idfValue > ((idfInfo *)idfVector->items[min_idx])->tf_idfValue)
+                min_idx = j;
+
+        // Swap the found maximum element with the first element
+        idfInfo *idfInfoToSwap = (idfInfo *)idfVector->items[i];
+        idfVector->items[i] = (idfInfo *)idfVector->items[min_idx];
+        idfVector->items[min_idx] = idfInfoToSwap;
     }
 }

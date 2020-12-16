@@ -13,6 +13,7 @@ struct SpecInfo
     char *pageTitle;
     InfoList *infoList;
     Vector *vectorMLinfo;
+    Vector *tfVector;
 };
 
 SpecInfo *initSpecInfo(char *, char *, char *);

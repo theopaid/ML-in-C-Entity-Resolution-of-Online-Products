@@ -14,11 +14,13 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
   newSpec->pageTitle = (char *)safe_malloc(strlen(title) + 1);
   strcpy(newSpec->pageTitle, title);
   newSpec->infoList = NULL;
-  newSpec->vectorMLinfo = vectorInit();
+  //newSpec->vectorMLinfo = vectorInit();
+  newSpec->tfVector = vectorInit();
   return newSpec;
 }
 
-SpecInfo *initSpecInfoEmpt(char *site, char *id) {
+SpecInfo *initSpecInfoEmpt(char *site, char *id)
+{
   SpecInfo *newSpec = (SpecInfo *)safe_malloc(sizeof(SpecInfo));
   char *json_stripped_id = (char *)safe_malloc(strlen(id) - 4);
   strncpy(json_stripped_id, id, strlen(id) - 5);
@@ -30,26 +32,28 @@ SpecInfo *initSpecInfoEmpt(char *site, char *id) {
   free(json_stripped_id);
   newSpec->pageTitle = NULL;
   newSpec->infoList = NULL;
-  newSpec->vectorMLinfo = vectorInit();
+  //newSpec->vectorMLinfo = vectorInit();
+  newSpec->tfVector = vectorInit();
   return newSpec;
 }
 
-void add_pageTitle_toSpec(SpecInfo *spec, char *page_title) {
-  if ( spec == NULL || spec->specId == NULL || spec->pageTitle != NULL ) {
+void add_pageTitle_toSpec(SpecInfo *spec, char *page_title)
+{
+  if (spec == NULL || spec->specId == NULL || spec->pageTitle != NULL)
+  {
     printf("Error: adding pagetitle to inappopriate spec (uninitialized or with pagetitle).\n");
     return;
   }
-  if ( page_title == NULL ) {
-      printf("Error: adding null page_title to spec\n");
-      return;
+  if (page_title == NULL)
+  {
+    printf("Error: adding null page_title to spec\n");
+    return;
   }
 
   spec->pageTitle = (char *)safe_malloc(strlen(page_title) + 1);
   strcpy(spec->pageTitle, page_title);
   return;
 }
-
-
 
 // void unitSpecInfo(SpecInfo *spec)
 // {
@@ -79,12 +83,12 @@ void freeInfoList(InfoList *infoList)
 
 void add_newInfo_toSpec(SpecInfo *spec, char *desc, char *info)
 {
-  if (desc == NULL || info == NULL || spec == NULL )
+  if (desc == NULL || info == NULL || spec == NULL)
   {
     printf("Error: adding null info\n");
     return;
   }
-  if (spec->specId == NULL )
+  if (spec->specId == NULL)
   {
     printf("Error: add to uninitialized spec\n");
     return;
@@ -187,7 +191,9 @@ void freeSpecInfo(SpecInfo *specInfo)
   free(specInfo->specId);
   free(specInfo->pageTitle);
   freeInfoList(specInfo->infoList);
-  freeMLinfo(specInfo->vectorMLinfo);
-  freeVector(specInfo->vectorMLinfo);
+  //freeMLinfo(specInfo->vectorMLinfo);
+  //freeVector(specInfo->vectorMLinfo);
+  //freeTFinfo(specInfo->tfVector);
+  //freeVector(specInfo->tfVector);
   free(specInfo);
 }
