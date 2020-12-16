@@ -3,6 +3,8 @@
 
 typedef struct MLInfo MLInfo;
 typedef struct idfInfo idfInfo;
+typedef struct tfInfo tfInfo;
+typedef struct tf_idfInfo tf_idfInfo;
 
 struct MLInfo
 {
@@ -18,6 +20,20 @@ struct idfInfo
     double timesSeen;
     int alreadySeenInSpecFlag;
     double idfValue;
+    double tfSum;
+    double tf_idfValue;
+};
+
+struct tfInfo
+{
+    char *word;
+    double tfValue;
+};
+
+struct tf_idfInfo
+{
+    char *word;
+    double tf_idfValue;
 };
 
 MLInfo *initMLinfo(char *string);
@@ -56,20 +72,38 @@ void initIDFinChain(SpecNode *head);
 
 void addSpecToIDF(SpecNode *specNode);
 
-void addWordToIDF(char *wordToBeInserted);
+void addWordToIDF(char *wordToBeInserted, Vector *tfVector);
 
 void computeIDFvalues(Vector *idfVector);
 
-void addSentenceToIDF(char *sentence);
+void addSentenceToIDF(char *sentence, Vector *tfVector);
 
-void processWordAddToIDF(char *word);
+void processWordAddToIDF(char *word, Vector *tfVector);
 
-void traverseInfoListToIDF(InfoList *infoList);
+void traverseInfoListToIDF(InfoList *infoList, Vector *tfVector);
 
 void printIDFvector(Vector *idfVector);
 
 void freeIDFinfo(Vector *idfVector);
 
 void resetIDFSeenFlags(Vector *idfVector);
+
+tfInfo *initTFinfo(char *string);
+
+void freeTFinfo(Vector *tfVector);
+
+void computeTFvalue(Vector *tfVector);
+
+void addWordToTF(char *wordToBeInserted, Vector *tfVector);
+
+void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector);
+
+void addTFvectorToIDF(Vector *tfVector, Vector *idfVector);
+
+tf_idfInfo *initTF_IDFinfo(char *string);
+
+void trimNitemsFromTF_IDF(Vector *idfVector, int nItems);
+
+void selectionSort(Vector *idfVector, int nItems);
 
 #endif
