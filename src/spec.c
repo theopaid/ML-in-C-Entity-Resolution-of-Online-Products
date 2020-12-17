@@ -16,6 +16,7 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
   newSpec->infoList = NULL;
   //newSpec->vectorMLinfo = vectorInit();
   newSpec->tfVector = vectorInit();
+  newSpec->tf_idfVectorFinal = vectorInit();
   return newSpec;
 }
 
@@ -34,6 +35,7 @@ SpecInfo *initSpecInfoEmpt(char *site, char *id)
   newSpec->infoList = NULL;
   //newSpec->vectorMLinfo = vectorInit();
   newSpec->tfVector = vectorInit();
+  newSpec->tf_idfVectorFinal = vectorInit();
   return newSpec;
 }
 
