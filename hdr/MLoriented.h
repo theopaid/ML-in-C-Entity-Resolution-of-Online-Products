@@ -102,8 +102,10 @@ void addTFvectorToIDF(Vector *tfVector, Vector *idfVector);
 
 tf_idfInfo *initTF_IDFinfo(char *string);
 
-void trimNitemsFromTF_IDF(Vector *idfVector, int nItems);
+void trimNitemsFromTF_IDF(Vector *idfVector);
 
-void selectionSort(Vector *idfVector, int nItems);
+void selectionSort(Vector *idfVector);
+
+void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector);
 
 #endif

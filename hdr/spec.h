@@ -14,6 +14,7 @@ struct SpecInfo
     InfoList *infoList;
     Vector *vectorMLinfo;
     Vector *tfVector;
+    Vector *tf_idfVectorFinal;
 };
 
 SpecInfo *initSpecInfo(char *, char *, char *);

@@ -447,7 +447,25 @@ void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector)
     {
         ((idfInfo *)idfVector->items[j])->tf_idfValue = (((idfInfo *)idfVector->items[j])->tfSum / specsInitiated) * ((idfInfo *)idfVector->items[j])->idfValue;
     }
-    trimNitemsFromTF_IDF(idfVector, 3000);
+    trimNitemsFromTF_IDF(idfVector);
+
+    specPtr = NULL;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
+            continue;
+        specPtr = hashTable->hashArray[i]->specList;
+        while (specPtr != NULL)
+        {
+            createTF_IDFforSpec(specPtr->cliquePtr->specInfo, idfVector);
+            specPtr = specPtr->nextSpec;
+        }
+    }
+    SpecInfo *testSpecInfo = searchHashTable(hashTable, "www.ebay.com//47709")->cliquePtr->specInfo;
+    for (int i = 0; i < 3000; i++)
+    {
+        printf(" %s : %f || ", ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->word, ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->tf_idfValue);
+    }
 }
 
 void addTFvectorToIDF(Vector *tfVector, Vector *idfVector)
@@ -479,20 +497,12 @@ tf_idfInfo *initTF_IDFinfo(char *string)
     return newTF_IDFinfo;
 }
 
-void trimNitemsFromTF_IDF(Vector *idfVector, int nItems)
+void trimNitemsFromTF_IDF(Vector *idfVector)
 {
-    selectionSort(idfVector, nItems);
-    tf_idfVector = vectorInit();
-    for (int i = 0; i < nItems; i++)
-    {
-        tf_idfInfo *newTF_IDFinfo = initTF_IDFinfo(((idfInfo *)idfVector->items[i])->word);
-        newTF_IDFinfo->tf_idfValue = ((idfInfo *)idfVector->items[i])->tf_idfValue;
-        vectorPushBack(tf_idfVector, newTF_IDFinfo);
-        printf(" %s : %f || ", ((idfInfo *)idfVector->items[i])->word, ((idfInfo *)idfVector->items[i])->tf_idfValue);
-    }
+    selectionSort(idfVector);
 }
 
-void selectionSort(Vector *idfVector, int nItems)
+void selectionSort(Vector *idfVector)
 {
     int i, j, min_idx;
     int itemsCount = vectorItemsCount(idfVector);
@@ -510,5 +520,41 @@ void selectionSort(Vector *idfVector, int nItems)
         idfInfo *idfInfoToSwap = (idfInfo *)idfVector->items[i];
         idfVector->items[i] = (idfInfo *)idfVector->items[min_idx];
         idfVector->items[min_idx] = idfInfoToSwap;
+    }
+}
+
+void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector)
+{
+    // copy n best tf_idf value words to the spec's tf_idf new vector
+    int n = 3000;
+    char *currentWord = NULL;
+    for (int i = 0; i < n; i++)
+    {
+        currentWord = ((idfInfo *)idfVector->items[i])->word;
+        tf_idfInfo *newTF_IDFinfo = initTF_IDFinfo(currentWord);
+        vectorPushBack(specInfo->tf_idfVectorFinal, newTF_IDFinfo);
+    }
+
+    // check if spec contains these words, or else input 0 tf_idf value
+    int tfVectorItemsCount = vectorItemsCount(specInfo->tfVector);
+    char *currentTF_IDFword = NULL;
+    char *currentTFword = NULL;
+    for (int i = 0; i < n; i++)
+    {
+        currentTF_IDFword = ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->word;
+        for (int j = 0; j < tfVectorItemsCount; j++)
+        {
+            currentTFword = ((tfInfo *)specInfo->tfVector->items[j])->word;
+            if (same_string(currentTF_IDFword, currentTFword))
+            {
+                double tf_value = ((tfInfo *)specInfo->tfVector->items[j])->tfValue;
+                double idf_value = ((idfInfo *)idfVector->items[i])->idfValue;
+                ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->tf_idfValue = tf_value * idf_value;
+                //printf("new value: %f\n", tf_value * idf_value);
+                break;
+            }
+        }
+        // word is not contained in spec
+        ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->tf_idfValue = 0.0;
     }
 }
