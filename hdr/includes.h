@@ -25,4 +25,6 @@
 #include "vectorImpl.h"
 #include "MLoriented.h"
 
+#include "logistic_regression.h"
+
 #endif
