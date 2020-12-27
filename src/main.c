@@ -37,11 +37,8 @@ int main(int argc, char **argv)
     fclose(fptr_miss);
 
     Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
-    //initML(hashTable, stopwords);
-    createIDFvector(hashTable, stopwords);
-    //printHashTable(hashTable);
-    //SpecNode *tmpspecnode = searchHashTable(hashTable, "www.alibaba.com//23876");
-    //print_spec(tmpspecnode->cliquePtr->specInfo);
+
+    //createIDFvector(hashTable, stopwords);
 
     freeHashTable(hashTable);
     freeVector(stopwords);

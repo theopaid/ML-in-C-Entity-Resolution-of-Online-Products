@@ -550,7 +550,7 @@ void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector)
                 double tf_value = ((tfInfo *)specInfo->tfVector->items[j])->tfValue;
                 double idf_value = ((idfInfo *)idfVector->items[i])->idfValue;
                 ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->tf_idfValue = tf_value * idf_value;
-                //printf("new value: %f\n", tf_value * idf_value);
+                //dprintf("new value: %f\n", tf_value * idf_value);
                 break;
             }
         }
