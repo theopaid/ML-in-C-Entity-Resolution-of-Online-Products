@@ -38,8 +38,15 @@ int main(int argc, char **argv)
 
     Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
 
-    //createIDFvector(hashTable, stopwords);
 
+    createIDFvector(hashTable, stopwords);
+    double *w_array = model_fittingV2(hashTable, getTrainingPairsVector());
+    // for (int i = 0; i < 3000; i++)
+    // {
+    //     printf("w[%d] : %f || ", i, w_array[i]);
+    // }
+    modelEvaluation(hashTable, getEvaluationPairsVector(), w_array);
+    
     freeHashTable(hashTable);
     freeVector(stopwords);
 

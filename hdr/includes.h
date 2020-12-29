@@ -26,5 +26,6 @@
 #include "MLoriented.h"
 
 #include "logistic_regression.h"
+#include "model_evaluation.h"
 
 #endif
