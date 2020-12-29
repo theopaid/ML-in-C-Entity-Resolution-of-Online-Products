@@ -23,4 +23,8 @@ int countCSVlines(char *fileName);
 
 PairInfo *initPairInfo(char *leftSpecId, char *rightSpecId, int isMatch);
 
+Vector *getTrainingPairsVector();
+
+Vector *getEvaluationPairsVector();
+
 #endif
