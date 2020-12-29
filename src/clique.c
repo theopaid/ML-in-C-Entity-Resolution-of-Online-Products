@@ -156,7 +156,7 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
         matchesFound++;
         printf("%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         if (fptr != NULL)
-            fprintf(fptr, "%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
+            fprintf(fptr, "%s,%s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         cliquePtr = cliquePtr->next;
     }
 }
@@ -177,7 +177,7 @@ void printSpecMissMatches(SpecNode *specNode, FILE *fptr)
         printf("%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
         if (fptr != NULL)
         {
-            fprintf(fptr, "%s , %s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
+            fprintf(fptr, "%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
         }
     }
 }

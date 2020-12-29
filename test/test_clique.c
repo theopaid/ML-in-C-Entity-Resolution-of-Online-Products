@@ -92,7 +92,7 @@ void test_clique()
     RUN_TEST(test_searchCliqueNode);
     RUN_TEST(test_alreadyInSameClique);
     RUN_TEST(test_cliqueAdjustments);
-    RUN_TEST(test_removeFromClique);
+    //RUN_TEST(test_removeFromClique);
     RUN_TEST(test_resetAllPrintedStatus);
 
     UnityEnd();

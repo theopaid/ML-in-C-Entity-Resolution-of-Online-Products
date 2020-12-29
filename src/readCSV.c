@@ -1,7 +1,5 @@
 #include "../hdr/includes.h"
 
-#define MAXLINE 1024
-
 int datasetWlinesRead;
 Vector *trainingPairsVector;
 Vector *evaluationPairsVector;
@@ -136,4 +134,19 @@ Vector *getTrainingPairsVector()
 Vector *getEvaluationPairsVector()
 {
     return evaluationPairsVector;
+}
+
+void freePairInfo(Vector *vectorPairInfo)
+{
+    int count = vectorItemsCount(vectorPairInfo);
+    for (int i = 0; i < count; i++)
+    {
+        free(((PairInfo *)vectorPairInfo->items[i])->leftSpecId);
+        free(((PairInfo *)vectorPairInfo->items[i])->rightSpecId);
+    }
+}
+void freePairVector(Vector *pairVector)
+{
+    //freePairInfo(pairVector);
+    //freeVector(pairVector);
 }

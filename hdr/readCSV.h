@@ -1,6 +1,8 @@
 #ifndef _READCSV_H
 #define _READCSV_H
 
+#define MAXLINE 1024
+
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
@@ -26,5 +28,9 @@ PairInfo *initPairInfo(char *leftSpecId, char *rightSpecId, int isMatch);
 Vector *getTrainingPairsVector();
 
 Vector *getEvaluationPairsVector();
+
+void freePairInfo(Vector *vectorPairInfo);
+
+void freePairVector(Vector *pairVector);
 
 #endif
