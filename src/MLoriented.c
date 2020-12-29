@@ -232,6 +232,7 @@ void createIDFvector(HashTable *hashTable, Vector *stopwords)
     //printf("idfVector size: %d\n", idfVector->itemsInserted);
     //printf("first: %s , %f , %f\n", ((idfInfo *)vectorGet(idfVector, 2000))->word, ((idfInfo *)vectorGet(idfVector, 2000))->timesSeen, ((idfInfo *)vectorGet(idfVector, 2000))->idfValue);
     computeTF_IDFvalues(hashTable, idfVector);
+
     freeIDFinfo(idfVector);
     freeVector(idfVector);
 }
@@ -461,11 +462,11 @@ void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector)
             specPtr = specPtr->nextSpec;
         }
     }
-    SpecInfo *testSpecInfo = searchHashTable(hashTable, "www.ebay.com//47709")->cliquePtr->specInfo;
-    for (int i = 0; i < 3000; i++)
-    {
-        printf(" %s : %f || ", ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->word, ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->tf_idfValue);
-    }
+    // SpecInfo *testSpecInfo = searchHashTable(hashTable, "www.ebay.com//47709")->cliquePtr->specInfo;
+    // for (int i = 0; i < 3000; i++)
+    // {
+    //     printf(" %s : %f || ", ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->word, ((tf_idfInfo *)testSpecInfo->tf_idfVectorFinal->items[i])->tf_idfValue);
+    // }
 }
 
 void addTFvectorToIDF(Vector *tfVector, Vector *idfVector)
@@ -526,7 +527,7 @@ void selectionSort(Vector *idfVector)
 void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector)
 {
     // copy n best tf_idf value words to the spec's tf_idf new vector
-    int n = 3000;
+    int n = TF_IDF_SIZE;
     char *currentWord = NULL;
     for (int i = 0; i < n; i++)
     {
@@ -539,8 +540,10 @@ void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector)
     int tfVectorItemsCount = vectorItemsCount(specInfo->tfVector);
     char *currentTF_IDFword = NULL;
     char *currentTFword = NULL;
+    int flag = 0;
     for (int i = 0; i < n; i++)
     {
+        flag = 0;
         currentTF_IDFword = ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->word;
         for (int j = 0; j < tfVectorItemsCount; j++)
         {
@@ -550,10 +553,12 @@ void createTF_IDFforSpec(SpecInfo *specInfo, Vector *idfVector)
                 double tf_value = ((tfInfo *)specInfo->tfVector->items[j])->tfValue;
                 double idf_value = ((idfInfo *)idfVector->items[i])->idfValue;
                 ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->tf_idfValue = tf_value * idf_value;
-                //dprintf("new value: %f\n", tf_value * idf_value);
+                flag = 1;
                 break;
             }
         }
+        if (flag == 1)
+            continue;
         // word is not contained in spec
         ((tf_idfInfo *)specInfo->tf_idfVectorFinal->items[i])->tf_idfValue = 0.0;
     }

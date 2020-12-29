@@ -1,6 +1,8 @@
 #ifndef _ML_H
 #define _ML_H
 
+#define TF_IDF_SIZE 3000
+
 typedef struct MLInfo MLInfo;
 typedef struct idfInfo idfInfo;
 typedef struct tfInfo tfInfo;

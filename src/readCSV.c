@@ -127,3 +127,13 @@ PairInfo *initPairInfo(char *leftSpecId, char *rightSpecId, int isMatch)
 
     return newPairInfo;
 }
+
+Vector *getTrainingPairsVector()
+{
+    return trainingPairsVector;
+}
+
+Vector *getEvaluationPairsVector()
+{
+    return evaluationPairsVector;
+}
