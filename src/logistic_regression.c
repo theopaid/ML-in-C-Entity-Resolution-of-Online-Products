@@ -101,9 +101,118 @@ double *model_fitting(int observation_size, int x_dimention, double **x_array, i
   return w_array;
 }
 
-double *model_fittingV2(Vector *tf_idfVector, Vector *trainingPairsVector)
+double *model_fittingV2(HashTable *hashTable, Vector *trainingPairsVector)
 {
-  double *w_array;
+    char *helperSpecId = ((PairInfo *)trainingPairsVector->items[0])->leftSpecId;
+    Vector *helperTF_IDFvector = findTF_IDFvector(hashTable, helperSpecId);
+    int helperVectorSize = vectorItemsCount(helperTF_IDFvector) + 1;
 
-  w_array = current_observation_weight_training(vectorItemsCount(tf_idfVector), tf_idfVector, trainingPairsVector);
+    int pairsCount = vectorItemsCount(trainingPairsVector);
+
+    double *w_array = (double *)safe_calloc(helperVectorSize, sizeof(double));
+    // init all weights to 1
+    for (int k = 0; k < helperVectorSize; k++)
+    {
+        w_array[k] = 10.0;
+    }
+
+    for (int i = 0; i < pairsCount; i++)
+    {
+        char *leftSpecId = ((PairInfo *)trainingPairsVector->items[i])->leftSpecId;
+        char *rightSpecId = ((PairInfo *)trainingPairsVector->items[i])->rightSpecId;
+        int isMatch = ((PairInfo *)trainingPairsVector->items[i])->isMatch;
+        w_array = current_observation_weight_trainingV2(findTF_IDFvector(hashTable, leftSpecId), findTF_IDFvector(hashTable, rightSpecId), w_array, isMatch);
+    }
+
+    return w_array;
+}
+
+double *current_observation_weight_trainingV2(Vector *leftTF_IDFvector, Vector *rightTF_IDFvector, double *w_array, int isMatch)
+{
+    int size = vectorItemsCount(leftTF_IDFvector);
+    if (size <= 0)
+    {
+        printf("Error: incorrect array size in model training\n");
+        exit(1);
+    }
+    double *tf_idfSum = calcTF_IDFsum(leftTF_IDFvector, rightTF_IDFvector);
+
+    double *w_next = (double *)safe_malloc(sizeof(double) * (size + 1));
+
+    // we need to find the next weight values for each x_j
+    // b value is always default
+    w_next[0] = 10.0;
+
+    for (int h = 0; h < 20; h++)
+    {
+        double p_x = p_logistic_function(f_linear_functionV2(size, tf_idfSum, w_array)); // same for all x_j
+
+        // for each x_j, calculate next w, with gardient descent
+        for (int j = 0; j < size; j++)
+        {
+            w_next[j + 1] = w_array[j + 1] - LEARNING_RATE * dj_gradient_function(p_x, isMatch, tf_idfSum[j]);
+            w_array[j + 1] = w_next[j + 1];
+        }
+    }
+
+    // check for end of loop
+    // TO BE REVISED IF NEEDED
+    // int flag = 0;
+    // for (int j = 0; j < size; j++)
+    // {
+    //     // if w_t+1 - w_t < 10^(-6) for all x_j then stop
+    //     if (w_next[j + 1] - w_array[j + 1] < pow(1, -6))
+    //     {
+    //         flag = 1;
+    //         continue;
+    //     }
+    //     else
+    //     {
+    //         flag = 0;
+    //         break;
+    //     }
+    // }
+    // if (flag == 0)
+    // {
+    //     free(w_next);
+    //     free(tf_idfSum);
+    //     return w_array;
+    // }
+    free(w_array);
+    free(tf_idfSum);
+
+    return w_next;
+}
+
+double f_linear_functionV2(int size, double *tf_idfSum, double *w_array)
+{
+    double f_x = w_array[0];
+
+    for (int i = 0; i < size; i++)
+    {
+        double tf_idfValue = tf_idfSum[i];
+        f_x = f_x + tf_idfValue * w_array[i + 1];
+    }
+
+    return f_x;
+}
+
+Vector *findTF_IDFvector(HashTable *hashTable, char *specId)
+{
+    SpecInfo *specInfo = searchHashTable(hashTable, specId)->cliquePtr->specInfo;
+    return specInfo->tf_idfVectorFinal;
+}
+
+double *calcTF_IDFsum(Vector *leftSpecIdVector, Vector *rightSpecIdVector)
+{
+    int itemsCount = vectorItemsCount(leftSpecIdVector);
+    double *tf_idfSum = (double *)safe_malloc(itemsCount * sizeof(double));
+    for (int i = 0; i < itemsCount; i++)
+    {
+        tf_idfSum[i] = ((tf_idfInfo *)leftSpecIdVector->items[i])->tf_idfValue + ((tf_idfInfo *)rightSpecIdVector->items[i])->tf_idfValue;
+        // if (tf_idfSum[i] != 0)
+        //     printf("SUM: %f\n", tf_idfSum[i]);
+    }
+
+    return tf_idfSum;
 }
