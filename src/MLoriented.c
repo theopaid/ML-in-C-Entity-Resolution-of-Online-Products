@@ -229,6 +229,7 @@ void createIDFvector(HashTable *hashTable, Vector *stopwords)
     }
     computeIDFvalues(idfVector);
     printIDFvector(idfVector);
+    puts("==> IDF vector computed...");
     //printf("idfVector size: %d\n", idfVector->itemsInserted);
     //printf("first: %s , %f , %f\n", ((idfInfo *)vectorGet(idfVector, 2000))->word, ((idfInfo *)vectorGet(idfVector, 2000))->timesSeen, ((idfInfo *)vectorGet(idfVector, 2000))->idfValue);
     computeTF_IDFvalues(hashTable, idfVector);
@@ -432,6 +433,7 @@ void computeTFvalue(Vector *tfVector)
 void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector)
 {
     SpecNode *specPtr = NULL;
+    puts("==> Adding to the IDF Vector average values from the TF vector of every Spec...");
     for (int i = 0; i < hashTable->size; i++)
     {
         if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
@@ -451,6 +453,7 @@ void computeTF_IDFvalues(HashTable *hashTable, Vector *idfVector)
     trimNitemsFromTF_IDF(idfVector);
 
     specPtr = NULL;
+    puts("==> Creating the TF-IDF vector for every Spec...");
     for (int i = 0; i < hashTable->size; i++)
     {
         if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
@@ -500,6 +503,7 @@ tf_idfInfo *initTF_IDFinfo(char *string)
 
 void trimNitemsFromTF_IDF(Vector *idfVector)
 {
+    puts("==> Sorting the IDF vector with the average TF and trimming it down to the top N values...");
     selectionSort(idfVector);
 }
 
