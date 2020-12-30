@@ -40,12 +40,14 @@ int main(int argc, char **argv)
 
     createIDFvector(hashTable, stopwords);
     double *w_array = model_fittingV2(hashTable, getTrainingPairsVector());
+    puts("==> Model training done...");
     // for (int i = 0; i < 3000; i++)
     // {
     //     printf("w[%d] : %f || ", i, w_array[i]);
     // }
     modelEvaluation(hashTable, getEvaluationPairsVector(), w_array);
 
+    puts("==> De-allocating structures...");
     freePairVector((Vector *)getTrainingPairsVector);
     freePairVector((Vector *)getEvaluationPairsVector);
 
