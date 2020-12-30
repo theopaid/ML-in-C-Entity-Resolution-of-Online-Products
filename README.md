@@ -2,6 +2,8 @@
 
 **Download `v1.0` of the project [HERE](https://github.com/theopaid/Project_JJ/releases/tag/v1.0)**
 
+**Download `v2.0` of the project [HERE](https://github.com/theopaid/Project_JJ/releases/tag/v2.0)**
+
 ## Collaborators:
 	Γρηγόρης Καλλίνικος - sdi1500056
 	
