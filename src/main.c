@@ -55,11 +55,25 @@ int main(int argc, char **argv)
 
     //  1.  Analyze and vectorize all Json in X with tf-idf
 
+    HashTable *hash_table = initHashTable(count_datafiles(datasetX));
+    read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
+
+    Vector *word_vector = create_words_vector(hash_table, stopwords);
+
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
+    
+    Vector *v1000 = reduce_vector_dimension(word_vector, 1000);
+    //Vector *v500 = reduce_vector_dimension(word_vector, 500);
 
     //  3.  Shuffle pairs in W --> W+ is the new set
 
+    Vector *W = read_csv_pairs_dataset(datasetW);
+    Vector *W_plus = shuffle_vector(W);
+
     //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
+
+    Vector *W1, *T, *V;
+    make_model_sets(W_plus, W1, T, V);
 
     //  5.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
     //      This way, the training set W?+ will be enhanced with new pairs that satisfy the threshhold condition.
@@ -71,10 +85,16 @@ int main(int argc, char **argv)
     //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+), 
     //          after that the training set will run for all pairs in X.
 
+    Vector *test_values = init_test_values();
+    Vector *b = train_weights_testing(W1, T, test_values);
+
+    b = train_weights(W1, datasetX, test_values);
+
     //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
+    test_model(V, b, test_values);
 
 
     freeHashTable(hashTable);

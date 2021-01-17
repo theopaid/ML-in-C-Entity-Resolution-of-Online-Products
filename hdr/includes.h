@@ -28,4 +28,6 @@
 #include "logistic_regression.h"
 #include "model_evaluation.h"
 
+#include "multithreading.h"
+
 #endif
