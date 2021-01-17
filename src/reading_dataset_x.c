@@ -212,6 +212,8 @@ void read_from_dir(char *dir_name, HashTable *hash_table)
   closedir(sites_dir);
 }
 
+
+
 int count_datafiles(char *path)
 {
   DIR *dir_ptr = NULL;
