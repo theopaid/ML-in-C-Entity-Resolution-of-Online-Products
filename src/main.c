@@ -97,6 +97,7 @@ int main(int argc, char **argv)
     test_model(V, b, test_values);
 
 
+
     freeHashTable(hashTable);
     freeVector(stopwords);
 
