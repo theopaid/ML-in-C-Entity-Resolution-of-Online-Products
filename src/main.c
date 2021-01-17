@@ -51,6 +51,32 @@ int main(int argc, char **argv)
     freePairVector((Vector *)getTrainingPairsVector);
     freePairVector((Vector *)getEvaluationPairsVector);
 
+    //  From here on the part 3 will be implemented
+
+    //  1.  Analyze and vectorize all Json in X with tf-idf
+
+    //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
+
+    //  3.  Shuffle pairs in W --> W+ is the new set
+
+    //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
+
+    //  5.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
+    //      This way, the training set W?+ will be enhanced with new pairs that satisfy the threshhold condition.
+    //      The threshold will be tested with stable increase, or with increased increasement.
+    //      What we get is the b (weight vector) values for each word (dimension) of the WN+ training set.
+    //      The training of each W?+ set will be done with batches in THREADS using a Job Scheduler (on stochastic gradient descend).
+    //  5.1.    In need to define the best values for:
+    //              (learing rate, #of threads, batch size, threshold value/step)
+    //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+), 
+    //          after that the training set will run for all pairs in X.
+
+    //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
+    //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
+    //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
+
+
+
     freeHashTable(hashTable);
     freeVector(stopwords);
 
