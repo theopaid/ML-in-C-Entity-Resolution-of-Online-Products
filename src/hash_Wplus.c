@@ -17,17 +17,26 @@ HashTable_w *initHashTable_w(int pairsSum)
     return newHashTable;
 }
 
-unsigned long long hashFunction_w(char *valueToHash)
+unsigned long long hashFunction_w(char *string1, char *string2)
 {
     unsigned long long h = 0;
-    // to be implemented
+    long len = strlen(string1);
+    for (int i = 0; i < len; i++)
+    {
+        h = h + 7 * string1[i];
+    }
+    len = strlen(string2);
+    for (int i = 0; i < len; i++)
+    {
+        h = h + 7 * string2[i];
+    }
 
     return h;
 }
 
 void addToHashTable_w(HashTable_w *hashTable, PairInfo_w *newPairInfo)
 {
-    unsigned long long hash = hashFunction_w(NULL);
+    unsigned long long hash = hashFunction_w(newPairInfo->leftSpecId, newPairInfo->rightSpecId);
     long posInHashTable = hash % hashTable->size;
 
     if (hashTable->hashArray[posInHashTable] == NULL)
@@ -65,23 +74,35 @@ PairInfo_w *initPairInfo_w(char *leftSpecId, char *rightSpecId, int isMatch)
     return newPairInfo;
 }
 
-PairInfo *searchHashTable_w(HashTable_w *hashTable, char *valueToSearch)
+PairInfo_w *searchHashTable_w(HashTable_w *hashTable, char *leftSpecId, char *rightSpecId)
 {
-    // to be implemented
-    return NULL;
+    int posInHashTable = hashFunction_w(leftSpecId, rightSpecId) % hashTable->size;
+    if (hashTable->hashArray[posInHashTable] == NULL)
+        return NULL;
+    return searchChain_w(hashTable->hashArray[posInHashTable]->pairsList, leftSpecId, rightSpecId);
 }
 
-PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *valueToSearch)
+PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *leftSpecId, char *rightSpecId)
 {
-    // to be implemented
-    return NULL;
+    PairInfo_w *listPtr = pairsListHead;
+    while (listPtr != NULL)
+    {
+        char *string1 = listPtr->leftSpecId;
+        char *string2 = listPtr->rightSpecId;
+        if ((same_string(leftSpecId, string1) && same_string(rightSpecId, string2)) || (same_string(leftSpecId, string2) && same_string(rightSpecId, string1)))
+        { // found
+            break;
+        }
+        listPtr = listPtr->nextPair;
+    }
+    return listPtr;
 }
 
 void freePairInfo_w(PairInfo_w *pairInfoNode)
 {
     if (pairInfoNode == NULL)
         return;
-    freePairInfoNode_w(pairInfoNode->nextPair);
+    freePairInfo_w(pairInfoNode->nextPair);
     free(pairInfoNode->leftSpecId);
     free(pairInfoNode->rightSpecId);
     free(pairInfoNode);
