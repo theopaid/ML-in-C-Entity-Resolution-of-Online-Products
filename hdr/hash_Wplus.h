@@ -29,7 +29,7 @@ struct PairInfo_w
 
 HashTable_w *initHashTable_w(int pairsSum);
 
-unsigned long long hashFunction_w(char *valueToHash);
+unsigned long long hashFunction_w(char *string1, char *string2);
 
 void addToHashTable_w(HashTable_w *hashTable, PairInfo_w *newPairInfo);
 
@@ -37,9 +37,9 @@ void insertInChain_w(HashBucket_w *bucketDst, PairInfo_w *newPairInfo);
 
 PairInfo_w *initPairInfo_w(char *leftSpecId, char *rightSpecId, int isMatch);
 
-PairInfo *searchHashTable_w(HashTable_w *hashTable, char *valueToSearch);
+PairInfo_w *searchHashTable_w(HashTable_w *hashTable, char *leftSpecId, char *rightSpecId);
 
-PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *valueToSearch);
+PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *leftSpecId, char *rightSpecId);
 
 void freePairInfo_w(PairInfo_w *pairInfoNode);
 
