@@ -59,9 +59,10 @@ int main(int argc, char **argv)
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));
     read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
 
+
     createIDFvector(hash_table, stopwords);
 
-    //  3.  Read the dataset W, making cliques and anticliques. This way we get set W+.
+    //  3.  Read the dataset W, making cliques and anticliques. This way we get set W+ (in hash_table).
     
     readDictionary(datasetW, hash_table);
     
@@ -81,16 +82,14 @@ int main(int argc, char **argv)
 
     Vector *test_values = init_test_values();
     Vector *b;
-    
-    b = train_weights_testing(W1, T, test_values);
-
     b = train_weights(W1, datasetX, test_values);
-
+    b = train_weights_testing(W1, T, test_values);
+  
     //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
-    test_model(V, b, test_values);
+    validate_model(V, b, test_values);
 
 
 
