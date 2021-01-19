@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <ctype.h>
 #include <math.h>
+#include <pthread.h>
 
 #include "utils.h"
 #include "spec.h"

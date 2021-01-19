@@ -1,6 +1,37 @@
 #ifndef _MULTI_THRD_
 #define _MULTI_THRD_
 
+#include <pthread.h>
+
+typedef struct JobScheduler JobScheduler;
+typedef struct Queue Queue;
+typedef struct QueueNode QueueNode;
+typedef struct Job Job;
+
+struct JobScheduler {
+    int no_of_threads; // number of execution threads
+    Queue *q;   // Queue that holds submitted jobs / tasks
+    pthread_t *tids;   // Execution threads
+
+    // mutex, condition variable, ...
+};
+
+struct Queue {
+    QueueNode *head;
+    int size;
+};
+
+struct QueueNode {
+    void *data;
+    QueueNode *next;
+};
+
+struct Job {
+    void *function_to_execute;
+    int type;   // 1 - for training in stochastic descend, 2 - for testing
+};
+
+
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
