@@ -5,47 +5,8 @@
 #include "../hdr/vectorImpl.h"
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
-
-typedef struct JobScheduler JobScheduler;
-typedef struct Queue Queue;
-typedef struct QueueNode QueueNode;
-typedef struct Job Job;
-
-struct JobScheduler {
-    int no_of_threads; // number of execution threads
-    Queue *q;   // Queue that holds submitted jobs / tasks
-    pthread_t *tids;   // Execution threads
-
-    // mutex, condition variable, ...
-};
-
-struct Queue {
-    QueueNode *head;
-    int size;
-};
-
-struct QueueNode {
-    void *data;
-    QueueNode *next;
-};
-
-struct Job {
-    void *function_to_execute;
-    int type;   // 1 - for training in stochastic descend, 2 - for testing
-};
-
-
-/**
- * @brief Calculates the word vector for all items in the hash_table, using specified stopwords.
- * @param hash_table The HashTable with the items.
- * @param stopwords The vector with the stopwords.
- * @returns the word vector for all items in the HashTable.
- */
-Vector *create_words_vector(HashTable *hash_table, Vector* stopwords);
-
 void *thread_func(void *arg);
 
-typedef struct thread_args thread_args_t;
 typedef struct QueueNode QueueNode;
 typedef struct Queue Queue;
 typedef struct JobScheduler JobScheduler;
