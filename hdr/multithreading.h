@@ -4,6 +4,35 @@
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
+typedef struct JobScheduler JobScheduler;
+typedef struct Queue Queue;
+typedef struct QueueNode QueueNode;
+typedef struct Job Job;
+
+struct JobScheduler {
+    int no_of_threads; // number of execution threads
+    Queue *q;   // Queue that holds submitted jobs / tasks
+    pthread_t *tids;   // Execution threads
+
+    // mutex, condition variable, ...
+};
+
+struct Queue {
+    QueueNode *head;
+    int size;
+};
+
+struct QueueNode {
+    void *data;
+    QueueNode *next;
+};
+
+struct Job {
+    void *function_to_execute;
+    int type;   // 1 - for training in stochastic descend, 2 - for testing
+};
+
+
 /**
  * @brief Calculates the word vector for all items in the hash_table, using specified stopwords.
  * @param hash_table The HashTable with the items.
@@ -68,11 +97,11 @@ Vector *train_weights_testing(Vector *W1, Vector *T, Vector *test_values);
 Vector *train_weights(Vector *W1, char *datasetX_path, Vector *test_values);
 
 /**
- * @brief Test the model using pairs in V, given weights and test_values and print the resulting accuracy.
+ * @brief Validate the model using pairs in V, given weights and test_values and print the resulting accuracy.
  * @param V The validation set.
  * @param weights The weights vector that has been calculated by training.
  * @param test_values The test_values of the model.
  */
-void test_model(Vector *V, Vector *weights, Vector *test_values);
+void validate_model(Vector *V, Vector *weights, Vector *test_values);
 
 #endif
