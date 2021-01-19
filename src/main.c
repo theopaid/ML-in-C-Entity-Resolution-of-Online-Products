@@ -54,6 +54,7 @@ int main(int argc, char **argv)
     //  From here on the part 3 will be implemented
 
     //  1.  Analyze and vectorize all Json in X with tf-idf
+
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
     
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));

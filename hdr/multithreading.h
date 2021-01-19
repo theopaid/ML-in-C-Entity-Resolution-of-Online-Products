@@ -4,6 +4,8 @@
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
+#define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
+
 typedef struct JobScheduler JobScheduler;
 typedef struct Queue Queue;
 typedef struct QueueNode QueueNode;
@@ -41,27 +43,60 @@ struct Job {
  */
 Vector *create_words_vector(HashTable *hash_table, Vector* stopwords);
 
-/**
- * @brief Reduce the dimension of the word_vector given to a specified new_dimension and produce a new word vector. If the dimension given is bigger than the words in the vector, the vector will remain unchanged.
- * @param word_vector The vector with the words to be used.
- * @param new_dimension The number of words the new vector will have.
- * @returns The new word vector produced.
- */
-Vector *reduce_vector_dimension(Vector *word_vector, int new_dimension);
+void *thread_func(void *arg);
 
-/**
- * @brief Read the pairs in a csv dataset file and vectorize them.
- * @param dataset_path The path to the dataset csv file.
- * @returns The vector with all pairs in the csv file.
- */
-Vector *read_csv_pairs_dataset(char *dataset_path);
+typedef struct thread_args thread_args_t;
+typedef struct QueueNode QueueNode;
+typedef struct Queue Queue;
+typedef struct JobScheduler JobScheduler;
+typedef struct Job Job;
+typedef struct thread_args thread_args_t;
 
-/**
- * @brief Shuffle the vector given and produce a new vector.
- * @param vector The vector to be shuffled.
- * @returns The new shuffled vector.
- */
-Vector *shuffle_vector(Vector *vector);
+struct JobScheduler {
+    int threads;
+    Queue *q;
+    pthread_t *tids;
+    pthread_cond_t cv;  // q_has_item
+    pthread_mutex_t mt; // queue lock mutex
+    pthread_barrier_t barrier; // thread barrier for simultaneous execution
+    thread_args_t *thread_args;
+};
+
+struct thread_args {
+    pthread_mutex_t *mt;
+    pthread_cond_t *cv;
+    pthread_barrier_t *barrier;
+    Queue *q;
+};
+
+struct Job {
+    void (*function_execute)(void *p); // can point to any function (task) with parameters or NULL
+};
+
+struct Queue {
+    QueueNode *head;
+    int size;
+};
+
+struct QueueNode {
+    void *data; // can point to any data type, in this case we want an initialized Job pointer passed to it
+    QueueNode *next;
+};
+
+/* Job Scheduler Operations */
+JobScheduler *scheduler_init(int no_of_threads);
+void scheduler_submit_job(JobScheduler *sch, Job *j);
+void scheduler_destroy(JobScheduler *sch);
+void scheduler_execute_all(JobScheduler *sch);
+void scheduler_wait_finish(JobScheduler *sch);
+
+/* queue operations */
+Queue* initialize_queue();
+void destroy_queue(Queue *q);
+void add(Queue *q, QueueNode *nn);
+int isempty(Queue *q);
+QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
+
 
 /**
  * @brief Make 3 new vectors using items in a specified vector. Percentages are 60%, 20% and 20%.
@@ -70,7 +105,7 @@ Vector *shuffle_vector(Vector *vector);
  * @param[out] set2 20% of all_set.
  * @param[out] set3 20% of all_set.
  */
-void make_model_sets(Vector *all_set, Vector *set1, Vector *set2, Vector *set3);
+void make_model_sets(HashTable *all_set, Vector *set1, Vector *set2, Vector *set3);
 
 /**
  * @brief Make a vector with initial test values for: learing rate, #of threads, batch size, threshold value, threshold step and threshold slep slope.
