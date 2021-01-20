@@ -28,6 +28,7 @@
 #include "logistic_regression.h"
 #include "model_evaluation.h"
 
+#include "hashTable_generic.h"
 #include "hash_Wplus.h"
 #include "multithreading.h"
 
