@@ -4,35 +4,60 @@
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
-/**
- * @brief Calculates the word vector for all items in the hash_table, using specified stopwords.
- * @param hash_table The HashTable with the items.
- * @param stopwords The vector with the stopwords.
- * @returns the word vector for all items in the HashTable.
- */
-Vector *create_words_vector(HashTable *hash_table, Vector* stopwords);
+#define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
+void *thread_func(void *arg);
 
-/**
- * @brief Reduce the dimension of the word_vector given to a specified new_dimension and produce a new word vector. If the dimension given is bigger than the words in the vector, the vector will remain unchanged.
- * @param word_vector The vector with the words to be used.
- * @param new_dimension The number of words the new vector will have.
- * @returns The new word vector produced.
- */
-Vector *reduce_vector_dimension(Vector *word_vector, int new_dimension);
+typedef struct QueueNode QueueNode;
+typedef struct Queue Queue;
+typedef struct JobScheduler JobScheduler;
+typedef struct Job Job;
+typedef struct thread_args thread_args_t;
 
-/**
- * @brief Read the pairs in a csv dataset file and vectorize them.
- * @param dataset_path The path to the dataset csv file.
- * @returns The vector with all pairs in the csv file.
- */
-Vector *read_csv_pairs_dataset(char *dataset_path);
+struct JobScheduler {
+    int threads;
+    Queue *q;
+    pthread_t *tids;
+    pthread_cond_t cv;  // q_has_item
+    pthread_mutex_t mt; // queue lock mutex
+    pthread_barrier_t barrier; // thread barrier for simultaneous execution
+    thread_args_t *thread_args;
+};
 
-/**
- * @brief Shuffle the vector given and produce a new vector.
- * @param vector The vector to be shuffled.
- * @returns The new shuffled vector.
- */
-Vector *shuffle_vector(Vector *vector);
+struct thread_args {
+    pthread_mutex_t *mt;
+    pthread_cond_t *cv;
+    pthread_barrier_t *barrier;
+    Queue *q;
+};
+
+struct Job {
+    void (*function_execute)(void *p); // can point to any function (task) with parameters or NULL
+};
+
+struct Queue {
+    QueueNode *head;
+    int size;
+};
+
+struct QueueNode {
+    void *data; // can point to any data type, in this case we want an initialized Job pointer passed to it
+    QueueNode *next;
+};
+
+/* Job Scheduler Operations */
+JobScheduler *scheduler_init(int no_of_threads);
+void scheduler_submit_job(JobScheduler *sch, Job *j);
+void scheduler_destroy(JobScheduler *sch);
+void scheduler_execute_all(JobScheduler *sch);
+void scheduler_wait_finish(JobScheduler *sch);
+
+/* queue operations */
+Queue* initialize_queue();
+void destroy_queue(Queue *q);
+void add(Queue *q, QueueNode *nn);
+int isempty(Queue *q);
+QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
+
 
 /**
  * @brief Make 3 new vectors using items in a specified vector. Percentages are 60%, 20% and 20%.
@@ -41,7 +66,7 @@ Vector *shuffle_vector(Vector *vector);
  * @param[out] set2 20% of all_set.
  * @param[out] set3 20% of all_set.
  */
-void make_model_sets(Vector *all_set, Vector *set1, Vector *set2, Vector *set3);
+void make_model_sets(HashTable *all_set, Vector *set1, Vector *set2, Vector *set3);
 
 /**
  * @brief Make a vector with initial test values for: learing rate, #of threads, batch size, threshold value, threshold step and threshold slep slope.
@@ -68,11 +93,11 @@ Vector *train_weights_testing(Vector *W1, Vector *T, Vector *test_values);
 Vector *train_weights(Vector *W1, char *datasetX_path, Vector *test_values);
 
 /**
- * @brief Test the model using pairs in V, given weights and test_values and print the resulting accuracy.
+ * @brief Validate the model using pairs in V, given weights and test_values and print the resulting accuracy.
  * @param V The validation set.
  * @param weights The weights vector that has been calculated by training.
  * @param test_values The test_values of the model.
  */
-void test_model(Vector *V, Vector *weights, Vector *test_values);
+void validate_model(Vector *V, Vector *weights, Vector *test_values);
 
 #endif

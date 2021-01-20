@@ -9,6 +9,10 @@
 #include <dirent.h>
 #include <ctype.h>
 #include <math.h>
+#include <unistd.h>
+#include <stdbool.h>
+
+#include <pthread.h>
 
 #include "utils.h"
 #include "spec.h"

@@ -8,6 +8,7 @@ DATASET_W = ./Datasets/sigmod_medium_labelled_dataset.csv
 CFLAGS  = -std=gnu99
 CFLAGS += -g
 CFLAGS += -Wall
+CFLAGS += -pthread
 #CFLAGS += -Wextra
 #CFLAGS += -pedantic
 #CFLAGS += -Werror
