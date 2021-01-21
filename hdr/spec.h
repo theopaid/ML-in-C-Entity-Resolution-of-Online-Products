@@ -12,9 +12,10 @@ struct SpecInfo
     char *specId;
     char *pageTitle;
     InfoList *infoList;
-    Vector *vectorMLinfo;
-    Vector *tfVector;
-    Vector *tf_idfVectorFinal;
+    HashTable_gen *tfidf_HTable
+    // Vector *vectorMLinfo;
+    // Vector *tfVector;
+    // Vector *tf_idfVectorFinal;
 };
 
 SpecInfo *initSpecInfo(char *, char *, char *);

@@ -8,6 +8,7 @@ typedef struct PairInfo_gen PairInfo_gen;
 struct HashTable_gen
 {
     long size;
+    long itemsInserted;
     HashBucket_gen **hashArray;
 };
 

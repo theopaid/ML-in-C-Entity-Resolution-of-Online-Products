@@ -56,7 +56,7 @@ void insertInChain_w(HashBucket_w *bucketDst, PairInfo_w *newPairInfo)
     }
 
     PairInfo_w *pairsListPtr = bucketDst->pairsList;
-    while (pairsListPtr != NULL)
+    while (pairsListPtr->nextPair != NULL)
     {
         pairsListPtr = pairsListPtr->nextPair;
     }

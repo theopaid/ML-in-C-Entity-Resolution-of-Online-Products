@@ -33,6 +33,7 @@
 #include "model_evaluation.h"
 
 #include "hashTable_generic.h"
+#include "tfidf_HTableImpl.h"
 #include "hash_Wplus.h"
 #include "multithreading.h"
 

@@ -8,6 +8,7 @@ HashTable_gen *initHashTable_gen(int initItemsN)
 
     HashTable_gen *newHashTable = (HashTable_gen *)safe_malloc(sizeof(HashTable_gen));
     newHashTable->size = bucketsToAlloc;
+    newHashTable->itemsInserted = 0;
     newHashTable->hashArray = (HashBucket_gen **)safe_calloc(bucketsToAlloc, sizeof(HashBucket_gen *));
 
     for (int i = 0; i < bucketsToAlloc; i++)
@@ -15,17 +16,6 @@ HashTable_gen *initHashTable_gen(int initItemsN)
         newHashTable->hashArray[i] = NULL;
     }
     return newHashTable;
-}
-
-PairInfo_w *initPairInfo_w(char *leftSpecId, char *rightSpecId, int isMatch)
-{
-    PairInfo_w *newPairInfo = safe_malloc(sizeof(PairInfo_w));
-    newPairInfo->leftSpecId = createString(leftSpecId);
-    newPairInfo->rightSpecId = createString(rightSpecId);
-    newPairInfo->isMatch = isMatch;
-    newPairInfo->nextPair = NULL;
-
-    return newPairInfo;
 }
 
 void freeHashBucket_gen(HashBucket_gen *hashBucket)

@@ -1,10 +1,10 @@
 #ifndef _ML_H
 #define _ML_H
 
-typedef struct MLInfo MLInfo;
-typedef struct idfInfo idfInfo;
-typedef struct tfInfo tfInfo;
-typedef struct tf_idfInfo tf_idfInfo;
+// typedef struct MLInfo MLInfo;
+// typedef struct idfInfo idfInfo;
+// typedef struct tfInfo tfInfo;
+// typedef struct tf_idfInfo tf_idfInfo;
 
 MLInfo *initMLinfo(char *string);
 
