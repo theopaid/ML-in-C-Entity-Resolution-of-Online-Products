@@ -54,10 +54,14 @@ int main(int argc, char **argv)
     //  From here on the part 3 will be implemented
 
     //  1.  Analyze and vectorize all Json in X with tf-idf
-
+  
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));
     read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 99a1f81e085b28d4d03647a5311f51a27a93f8a2
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
     //  3.  Shuffle pairs in W --> W+ is the new set
 

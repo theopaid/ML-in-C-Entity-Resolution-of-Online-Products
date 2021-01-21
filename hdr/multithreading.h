@@ -16,7 +16,6 @@
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 void *thread_func(void *arg);
 
-typedef struct thread_args thread_args_t;
 typedef struct QueueNode QueueNode;
 typedef struct Queue Queue;
 typedef struct JobScheduler JobScheduler;
