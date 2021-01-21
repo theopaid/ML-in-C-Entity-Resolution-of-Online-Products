@@ -4,6 +4,7 @@
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
+
 #define LEARNING_RATE 0.07
 #define THREADS_NUM 2
 #define BATCH_SIZE 750

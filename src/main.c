@@ -57,19 +57,12 @@ int main(int argc, char **argv)
   
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));
     read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
-<<<<<<< HEAD
-
-=======
-  
->>>>>>> 99a1f81e085b28d4d03647a5311f51a27a93f8a2
+ 
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
     //  3.  Shuffle pairs in W --> W+ is the new set
-
-    //readDictionary(datasetW, hash_table);
-    
     //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
 
-    //HashTable_w *W1, *T, *V;
+    // Vector *W1, *T, *V;
     //make_model_sets(hash_table, W1, T, V);
 
     //  5.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
