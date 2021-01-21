@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     getArgs(&datasetX, &datasetW, argv);
     puts(datasetW);
     puts(datasetX);
-
+/*
     HashTable *hashTable = initHashTable(count_datafiles(datasetX));
 
     read_from_dir(datasetX, hashTable);
@@ -50,18 +50,22 @@ int main(int argc, char **argv)
     puts("==> De-allocating structures...");
     freePairVector((Vector *)getTrainingPairsVector);
     freePairVector((Vector *)getEvaluationPairsVector);
-
+*/
     //  From here on the part 3 will be implemented
 
     //  1.  Analyze and vectorize all Json in X with tf-idf
 
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));
     read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
+
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
     //  3.  Shuffle pairs in W --> W+ is the new set
+
+    //readDictionary(datasetW, hash_table);
+    
     //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
 
-    Vector *W1, *T, *V;
+    //HashTable_w *W1, *T, *V;
     //make_model_sets(hash_table, W1, T, V);
 
     //  5.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
@@ -71,24 +75,22 @@ int main(int argc, char **argv)
     //      The training of each W?+ set will be done with batches in THREADS using a Job Scheduler (on stochastic gradient descend).
     //  5.1.    In need to define the best values for:
     //              (learing rate, #of threads, batch size, threshold value/step)
-    //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+), 
-    //          after that the training set will run for all pairs in X.
+    //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+).
 
-    Vector *test_values = init_test_values();
-    Vector *b = train_weights_testing(W1, T, test_values);
-
-    b = train_weights(W1, datasetX, test_values);
+    //double *b = train_weights(hash_table, W1);
+    
+    //b = train_weights_testing(W1, T, b);
 
     //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
-    validate_model(V, b, test_values);
+    //validate_model(V, b);
 
 
 
-    freeHashTable(hashTable);
-    freeVector(stopwords);
+    freeHashTable(hash_table);
+    //freeVector(stopwords);
 
     clock_t end = clock();
     timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
