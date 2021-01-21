@@ -19,40 +19,21 @@ char *getField(char *line, int fieldNum)
 
 void readDictionary(char *fileName, HashTable *hashTable)
 {
-    int linesCount = countCSVlines(fileName);
-    int sixtyPercent = linesCount * 0.6;
-    int twentyPercentMore = linesCount * 0.2 + sixtyPercent;
-    int loopCount = 0;
     FILE *stream = fopen(fileName, "r");
     if (stream == NULL)
     {
         printf("Could not create %s\n", fileName);
         exit(EXIT_FAILURE);
     }
-    trainingPairsVector = vectorInit();
-    evaluationPairsVector = vectorInit();
 
     char line[MAXLINE], *leftSpecId, *rightSpecId;
     fgets(line, MAXLINE, stream); // for the first csv line
     while (fgets(line, MAXLINE, stream))
     {
-        loopCount++;
         char *tmp1 = strdup(line), *tmp2 = strdup(line), *tmp3 = strdup(line);
         int isMatching = atoi(getField(tmp1, 3));
         leftSpecId = getField(tmp2, 1);
         rightSpecId = getField(tmp3, 2);
-        PairInfo *newPairInfo = initPairInfo(leftSpecId, rightSpecId, isMatching);
-        if (loopCount <= sixtyPercent)
-        {
-            vectorPushBack(trainingPairsVector, newPairInfo);
-        }
-        else if (loopCount <= twentyPercentMore)
-        {
-            vectorPushBack(evaluationPairsVector, newPairInfo);
-        }
-        else
-        {
-        }
 
         if (isMatching)
         {

@@ -15,7 +15,6 @@ struct CliqueNode // Θα υλοποιηθεί κυκλική λίστα. Αρχ
     SpecInfo *specInfo;
     CliqueNode *next;
     CliqueNode *prev;
-    //MissMatchNode *missMatchList;
     Vector *cliqueMissMatchVector;
     int isPrinted;
     int hasPrintedMissMatches;

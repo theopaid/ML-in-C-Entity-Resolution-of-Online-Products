@@ -27,12 +27,14 @@
 
 #include "printing_cliques.h"
 #include "vectorImpl.h"
-#include "MLoriented.h"
+//#include "MLoriented.h"
+#include "hashTable_generic.h"
+#include "tfidf_HTableImpl.h"
 
 #include "logistic_regression.h"
 #include "model_evaluation.h"
 
-#include "hashTable_generic.h"
+#include "stopwords.h"
 #include "hash_Wplus.h"
 #include "multithreading.h"
 
