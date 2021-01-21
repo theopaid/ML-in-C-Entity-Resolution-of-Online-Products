@@ -4,7 +4,6 @@
 #include "../hdr/hash.h"
 #include "../hdr/vectorImpl.h"
 
-
 #define LEARNING_RATE 0.07
 #define THREADS_NUM 2
 #define BATCH_SIZE 750
@@ -13,6 +12,7 @@
 #define THRESHOLD_STEP 0.2
 #define THRESHOLD_SLOPE 1
 #define WEIGHTS_START_VAL 10.0
+#define TF_IDF_SIZE 1000
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 void *thread_func(void *arg);
