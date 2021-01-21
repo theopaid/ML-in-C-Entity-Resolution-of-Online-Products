@@ -33,7 +33,7 @@ void freeHashTable_gen(HashTable_gen *hashTable)
         return;
     for (int i = 0; i < hashTable->size; i++)
     {
-        freeHashBucket_w(hashTable->hashArray[i]);
+        freeHashBucket_gen(hashTable->hashArray[i]);
     }
     free(hashTable->hashArray);
     free(hashTable);

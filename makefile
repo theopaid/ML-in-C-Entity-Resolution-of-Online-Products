@@ -72,8 +72,7 @@ cl: clobber
 
 .PHONY: run
 run: clean build
-	@valgrind $(VFLAGS) ./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
-	@echo "Memory check passed"
+	./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
 .PHONY: r
 r: run
 

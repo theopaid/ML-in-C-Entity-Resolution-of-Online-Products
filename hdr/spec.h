@@ -6,13 +6,16 @@
 typedef struct SpecInfo SpecInfo;
 typedef struct InfoList InfoList;
 typedef struct InfoNode InfoNode;
+typedef struct HashTable_gen HashTable_gen;
+typedef struct HashBucket_gen HashBucket_gen;
 
 struct SpecInfo
 {
     char *specId;
     char *pageTitle;
     InfoList *infoList;
-    HashTable_gen *tfidf_HTable
+    HashTable_gen *tfidf_HTable;
+    Vector *tfidf_vector;
     // Vector *vectorMLinfo;
     // Vector *tfVector;
     // Vector *tf_idfVectorFinal;

@@ -3,6 +3,7 @@
 HashTable_gen *idfHTable;
 
 double totalSpecs;
+HashTable_gen *stopwordsHTable;
 
 ////////// INITIALIZATIONS //////////////////
 tf_idfInfo *initTFIDFinfo(char *word)
@@ -24,6 +25,7 @@ idfInfo *initIDFinfo(char *word)
 
     return newInfo;
 }
+//////////////
 
 ////////// SEARCH FUNCTIONS FOR TF_IDF AND IDF HTABLES //////////////////
 tf_idfInfo *searchTFIDF_htable(HashTable_gen *hashTable, char *word)
@@ -71,6 +73,7 @@ idfInfo *searchIDF_htableChain(idfInfo *listHead, char *word)
     }
     return listPtr;
 }
+///////////////////////
 
 ////////// INSERT FUNCTIONS FOR TF_IDF AND IDF HTABLES //////////////////
 void addToTFIDF_htable(HashTable_gen *hashTable, char *word)
@@ -118,6 +121,7 @@ int insertInTFIDFchain(HashBucket_gen *bucketDst, char *word)
     addToIDF_htable(idfHTable, word);
     return 1;
 }
+////////////////////////
 
 void addToIDF_htable(HashTable_gen *hashTable, char *word)
 {
@@ -162,6 +166,7 @@ int insertInIDFchain(HashBucket_gen *bucketDst, char *word)
     prevPtr->next = newInfo;
     return 1;
 }
+////////////////////////
 
 ///////////////// CALCULATIONS FOR FINAL TF_IDF VALUES ///////////////////////
 void calculateFinalIDF(HashTable_gen *hashTable)
@@ -211,7 +216,7 @@ Vector *calculateFinalTFIDFforSpec(HashTable_gen *hashTable)
     return tfidfVector;
 }
 
-void *sortTFIDFvector(Vector *tfidfVector)
+void sortTFIDFvector(Vector *tfidfVector)
 { // let's do a selection sort
     int i, j, min_idx;
     int itemsCount = vectorItemsCount(tfidfVector);
@@ -233,24 +238,226 @@ void *sortTFIDFvector(Vector *tfidfVector)
         tfidfVector->items[min_idx] = tfidfInfoToSwap;
     }
 }
+///////////////////
 
-void selectionSort(Vector *idfVector)
+//////////////// FREE FUNCTIONS FOR BOTH HTABLES //////////////////////
+void freeIDFInfoList(idfInfo *listPtr)
 {
-    int i, j, min_idx;
-    int itemsCount = vectorItemsCount(idfVector);
+    if (listPtr == NULL)
+        return;
 
-    // One by one move boundary of unsorted subarray
-    for (i = 0; i < itemsCount - 1; i++)
+    freeIDFInfoList(listPtr->next);
+    free(listPtr->word);
+    free(listPtr);
+}
+
+void freeIDFHashBucket(HashBucket_gen *hashBucket)
+{
+    if (hashBucket == NULL)
     {
-        // Find the maximum element in unsorted array
-        min_idx = i;
-        for (j = i + 1; j < itemsCount; j++)
-            if (((idfInfo *)idfVector->items[j])->tf_idfValue > ((idfInfo *)idfVector->items[min_idx])->tf_idfValue)
-                min_idx = j;
-
-        // Swap the found maximum element with the first element
-        idfInfo *idfInfoToSwap = (idfInfo *)idfVector->items[i];
-        idfVector->items[i] = (idfInfo *)idfVector->items[min_idx];
-        idfVector->items[min_idx] = idfInfoToSwap;
+        return;
     }
+    freeIDFInfoList(hashBucket->bucketList);
+    free(hashBucket);
+}
+
+void freeIDFHashTable(HashTable_gen *hashTable)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        freeIDFHashBucket(hashTable->hashArray[i]);
+    }
+    free(hashTable->hashArray);
+    free(hashTable);
+}
+/////////////////////////
+
+void freeTFIDFInfoList(tf_idfInfo *listPtr)
+{
+    if (listPtr == NULL)
+        return;
+
+    freeTFIDFInfoList(listPtr->next);
+    free(listPtr->word);
+    free(listPtr);
+}
+
+void freeTFIDFHashBucket(HashBucket_gen *hashBucket)
+{
+    if (hashBucket == NULL)
+    {
+        return;
+    }
+    freeTFIDFInfoList(hashBucket->bucketList);
+    free(hashBucket);
+}
+
+void freeTFIDFHashTable(HashTable_gen *hashTable)
+{
+    if (hashTable == NULL)
+        return;
+    for (int i = 0; i < hashTable->size; i++)
+    {
+        freeTFIDFHashBucket(hashTable->hashArray[i]);
+    }
+    free(hashTable->hashArray);
+    free(hashTable);
+}
+///////////////////
+
+/////////////////////// MAIN FUNCTIONS /////////////////////////
+void createTFIDFvectors(HashTable *mainHTable, HashTable_gen *stopwordsHTable_)
+{
+    if (mainHTable == NULL)
+        return;
+
+    idfHTable = initHashTable_gen(AVG_TOTAL_WORDS);
+    stopwordsHTable = stopwordsHTable_;
+    totalSpecs = 0;
+    long htableSize = mainHTable->size;
+    for (int i = 0; i < htableSize; i++)
+    {
+        if (mainHTable->hashArray[i] == NULL)
+            continue;
+        createTFIDFvectorsInChain(mainHTable->hashArray[i]->specList);
+    }
+    calculateFinalIDF(idfHTable);
+
+    for (int i = 0; i < htableSize; i++)
+    {
+        if (mainHTable->hashArray[i] == NULL)
+            continue;
+        calculateFinalTFIDFinChain(mainHTable->hashArray[i]->specList);
+    }
+
+    freeIDFHashTable(idfHTable);
+}
+
+void calculateFinalTFIDFinChain(SpecNode *head)
+{
+    SpecNode *specPtr = head;
+    SpecInfo *currentSpecInfo = NULL;
+    while (specPtr != NULL)
+    {
+        //addSpecToTFIDF_HTables(specPtr);
+        currentSpecInfo = specPtr->cliquePtr->specInfo;
+        currentSpecInfo->tfidf_vector = calculateFinalTFIDFforSpec(currentSpecInfo->tfidf_HTable);
+        specPtr = specPtr->nextSpec;
+    }
+}
+
+void createTFIDFvectorsInChain(SpecNode *head)
+{
+    SpecNode *specPtr = head;
+    while (specPtr != NULL)
+    {
+        addSpecToTFIDF_HTables(specPtr);
+        specPtr = specPtr->nextSpec;
+    }
+}
+
+void addSpecToTFIDF_HTables(SpecNode *specNode)
+{
+    totalSpecs++;
+    SpecInfo *specInfo = specNode->cliquePtr->specInfo;
+    if (specInfo == NULL)
+        return;
+    specInfo->tfidf_HTable = initHashTable_gen(AVG_WORDS_IN_JSON);
+    processWordAddToTFIDF_HTables(specInfo->tfidf_HTable, "page");
+    processWordAddToTFIDF_HTables(specInfo->tfidf_HTable, "title");
+    addSentenceToTFIDF_HTables(specInfo->tfidf_HTable, specInfo->pageTitle);
+    traverseInfoListToTFIDF_HTables(specInfo->tfidf_HTable, specInfo->infoList);
+}
+
+void processWordAddToTFIDF_HTables(HashTable_gen *tfidfHTable, char *word)
+{
+    char *wordCopy = createString(word);
+    for (int i = 0; i < strlen(wordCopy); i++)
+    {
+        wordCopy[i] = tolower(wordCopy[i]);
+    }
+    if (isInStopwords(stopwordsHTable, wordCopy))
+    {
+        free(wordCopy);
+        return;
+    }
+    addToTFIDF_htable(tfidfHTable, wordCopy);
+    free(wordCopy);
+}
+
+void addSentenceToTFIDF_HTables(HashTable_gen *tfidfHTable, char *sentence)
+{
+    char delim[15] = {
+        ' ',
+        ',',
+        '.',
+        ':',
+        '\n',
+        '&',
+        '\\',
+        '|',
+        '/',
+        '-',
+        '(',
+        ')',
+        '!',
+        '?',
+        '=',
+    };
+    char *ptr = strtok(sentence, delim);
+    while (ptr != NULL)
+    {
+        processWordAddToTFIDF_HTables(tfidfHTable, ptr);
+        ptr = strtok(NULL, delim);
+    }
+}
+
+void traverseInfoListToTFIDF_HTables(HashTable_gen *tfidfHTable, InfoList *infoList)
+{
+    InfoNode *tmpInfoNode = infoList->head;
+    while (tmpInfoNode != NULL)
+    {
+        addSentenceToTFIDF_HTables(tfidfHTable, tmpInfoNode->description);
+        addSentenceToTFIDF_HTables(tfidfHTable, tmpInfoNode->content);
+
+        tmpInfoNode = tmpInfoNode->next;
+    }
+}
+
+void printTFIDFvectors(HashTable *mainHTable)
+{
+    for (int i = 0; i < mainHTable->size; i++)
+    {
+        if (mainHTable->hashArray[i] == NULL)
+            continue;
+        printTFIDFvectorInChain(mainHTable->hashArray[i]->specList);
+    }
+}
+
+void printTFIDFvectorInChain(SpecNode *head)
+{
+    SpecNode *listPtr = head;
+    while (listPtr != NULL)
+    {
+        if (vectorItemsCount(listPtr->cliquePtr->specInfo->tfidf_vector) >= 1000)
+        {
+            printf("specId: %s\n", listPtr->cliquePtr->specInfo->specId);
+        }
+        printfTFIDFvectorForSpec(listPtr->cliquePtr->specInfo->tfidf_vector);
+        listPtr = listPtr->nextSpec;
+    }
+}
+
+void printfTFIDFvectorForSpec(Vector *tfidfVector)
+{
+    int itemsCount = vectorItemsCount(tfidfVector);
+    for (int i = 0; i < itemsCount; i++)
+    {
+        tf_idfInfo *currentWordInfo = (tf_idfInfo *)vectorGet(tfidfVector, i);
+        printf("%s : %f || ", currentWordInfo->word, currentWordInfo->tf_idfValue);
+    }
+    puts(" ");
+    puts("== NEXT ==");
 }

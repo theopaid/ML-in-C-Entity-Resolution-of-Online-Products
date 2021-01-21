@@ -24,25 +24,9 @@ struct idfInfo
     idfInfo *next;
 };
 
-tf_idfInfo *initTFIDFinfo(char *word)
-{
-    tf_idfInfo *newInfo = (tf_idfInfo *)safe_malloc(sizeof(tf_idfInfo));
-    newInfo->word = createString(word);
-    newInfo->tf_idfValue = 0.0;
-    newInfo->next = NULL;
+tf_idfInfo *initTFIDFinfo(char *word);
 
-    return newInfo;
-}
-
-idfInfo *initIDFinfo(char *word)
-{
-    idfInfo *newInfo = (idfInfo *)safe_malloc(sizeof(idfInfo));
-    newInfo->word = createString(word);
-    newInfo->idfValue = 0.0;
-    newInfo->next = NULL;
-
-    return newInfo;
-}
+idfInfo *initIDFinfo(char *word);
 
 tf_idfInfo *searchTFIDF_htable(HashTable_gen *hashTable, char *word);
 
@@ -64,9 +48,39 @@ void calculateFinalIDF(HashTable_gen *hashTable);
 
 Vector *calculateFinalTFIDFforSpec(HashTable_gen *hashTable);
 
-void *sortTFIDFvector(Vector *tfidfVector);
+void sortTFIDFvector(Vector *tfidfVector);
 
-void selectionSort(Vector *idfVector);
+void freeIDFInfoList(idfInfo *listPtr);
+
+void freeIDFHashBucket(HashBucket_gen *hashBucket);
+
+void freeIDFHashTable(HashTable_gen *hashTable);
+
+void freeTFIDFInfoList(tf_idfInfo *listPtr);
+
+void freeTFIDFHashBucket(HashBucket_gen *hashBucket);
+
+void freeTFIDFHashTable(HashTable_gen *hashTable);
+
+void createTFIDFvectors(HashTable *mainHTable, HashTable_gen *stopwordsHTable_);
+
+void calculateFinalTFIDFinChain(SpecNode *head);
+
+void createTFIDFvectorsInChain(SpecNode *head);
+
+void addSpecToTFIDF_HTables(SpecNode *specNode);
+
+void processWordAddToTFIDF_HTables(HashTable_gen *tfidfHTable, char *word);
+
+void addSentenceToTFIDF_HTables(HashTable_gen *tfidfHTable, char *sentence);
+
+void traverseInfoListToTFIDF_HTables(HashTable_gen *tfidfHTable, InfoList *infoList);
+
+void printTFIDFvectors(HashTable *mainHTable);
+
+void printTFIDFvectorInChain(SpecNode *head);
+
+void printfTFIDFvectorForSpec(Vector *tfidfVector);
 
 // struct idfInfo
 // {

@@ -14,9 +14,8 @@ SpecInfo *initSpecInfo(char *site, char *id, char *title)
   newSpec->pageTitle = (char *)safe_malloc(strlen(title) + 1);
   strcpy(newSpec->pageTitle, title);
   newSpec->infoList = NULL;
-  //newSpec->vectorMLinfo = vectorInit();
-  newSpec->tfVector = vectorInit();
-  newSpec->tf_idfVectorFinal = vectorInit();
+  newSpec->tfidf_HTable = NULL;
+  newSpec->tfidf_vector = NULL;
   return newSpec;
 }
 
@@ -33,9 +32,8 @@ SpecInfo *initSpecInfoEmpt(char *site, char *id)
   free(json_stripped_id);
   newSpec->pageTitle = NULL;
   newSpec->infoList = NULL;
-  //newSpec->vectorMLinfo = vectorInit();
-  newSpec->tfVector = vectorInit();
-  newSpec->tf_idfVectorFinal = vectorInit();
+  newSpec->tfidf_HTable = NULL;
+  newSpec->tfidf_vector = NULL;
   return newSpec;
 }
 
