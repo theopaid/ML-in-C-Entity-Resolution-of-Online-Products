@@ -62,4 +62,10 @@ int closestPrime(int num);
 
 void printHashingBenchmarks();
 
+HashTable *getMainHTable();
+
+Vector *getMatchesVector();
+
+Vector *getMissMatchesVector();
+
 #endif

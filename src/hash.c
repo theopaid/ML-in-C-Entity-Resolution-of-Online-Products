@@ -1,6 +1,9 @@
 #include "../hdr/includes.h"
 
 int countPrintedSpecs = 0;
+HashTable *mainHTable = NULL;
+Vector *matchesVector = NULL;
+Vector *missMatchesVector = NULL;
 /**
  * For Benchmarking use only!
  * */
@@ -46,6 +49,8 @@ HashTable *initHashTable(int specSum)
     {
         hashTable->hashArray[i] = NULL;
     }
+
+    mainHTable = hashTable;
     return hashTable;
 }
 
@@ -133,6 +138,7 @@ void printAllMatches(HashTable *hashTable, FILE *fptr)
 {
     if (hashTable == NULL)
         return;
+    matchesVector = vectorInit();
     for (int i = 0; i < hashTable->size; i++)
     {
         if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
@@ -158,6 +164,7 @@ void printAllMissMatches(HashTable *hashTable, FILE *fptr)
 {
     if (hashTable == NULL)
         return;
+    missMatchesVector = vectorInit();
     for (int i = 0; i < hashTable->size; i++)
     {
         if (hashTable->hashArray[i] == NULL) // bucket not allocated, has no Specs
@@ -248,4 +255,19 @@ void printHashingBenchmarks()
     printf("Insertions: %d\n", insertions);
     printf("Collisions: %d\n", collisions);
     printf("Searches in chains: %d\n", searchInChain);
+}
+
+HashTable *getMainHTable()
+{
+    return mainHTable;
+}
+
+Vector *getMatchesVector()
+{
+    return matchesVector;
+}
+
+Vector *getMissMatchesVector()
+{
+    return missMatchesVector;
 }

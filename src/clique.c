@@ -154,7 +154,9 @@ void printSpecMatches(SpecNode *specNode, FILE *fptr)
             continue;
         }
         matchesFound++;
-        printf("%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
+        //printf("%s , %s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
+        Observation *newObservation = initObservation(cliqueNode->specInfo->specId, cliquePtr->specInfo->specId, 1);
+        vectorPushBack(getMatchesVector(), newObservation);
         if (fptr != NULL)
             fprintf(fptr, "%s,%s\n", cliqueNode->specInfo->specId, cliquePtr->specInfo->specId);
         cliquePtr = cliquePtr->next;
@@ -174,7 +176,9 @@ void printSpecMissMatches(SpecNode *specNode, FILE *fptr)
             continue;
         }
         missMatchesFound++;
-        printf("%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
+        //printf("%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
+        Observation *newObservation = initObservation(cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId, 0);
+        vectorPushBack(getMissMatchesVector(), newObservation);
         if (fptr != NULL)
         {
             fprintf(fptr, "%s,%s\n", cliquePtr->specInfo->specId, missMatchCliqueNode->specInfo->specId);
