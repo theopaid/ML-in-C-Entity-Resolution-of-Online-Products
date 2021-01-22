@@ -2,12 +2,13 @@
 #define _HASHGEN_H
 
 typedef struct HashTable_gen HashTable_gen;
-typedef struct HashBucket_gen HashBucket_gen;
+//typedef struct HashBucket_gen HashBucket_gen;
 typedef struct PairInfo_gen PairInfo_gen;
 
 struct HashTable_gen
 {
     long size;
+    long itemsInserted;
     HashBucket_gen **hashArray;
 };
 

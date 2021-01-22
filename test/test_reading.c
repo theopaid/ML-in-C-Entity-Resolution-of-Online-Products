@@ -6,8 +6,8 @@
 void test_count_datafiles(void)
 {
   TEST_ASSERT_EQUAL(2, count_datafiles("./test_files/"));
-  TEST_ASSERT_EQUAL(12, count_datafiles("./src/"));
-  TEST_ASSERT_EQUAL(13, count_datafiles("./hdr/"));
+  TEST_ASSERT_EQUAL(16, count_datafiles("./src/"));
+  TEST_ASSERT_EQUAL(17, count_datafiles("./hdr/"));
 }
 
 void test_reading()

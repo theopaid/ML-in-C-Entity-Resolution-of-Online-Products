@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     getArgs(&datasetX, &datasetW, argv);
     puts(datasetW);
     puts(datasetX);
-/*
+
     HashTable *hashTable = initHashTable(count_datafiles(datasetX));
 
     read_from_dir(datasetX, hashTable);
@@ -26,9 +26,9 @@ int main(int argc, char **argv)
     FILE *fptr = open_file("./output/matches.txt");
     FILE *fptr_miss = open_file("./output/miss_matches.txt");
 
-    puts("------ MATCHES ------");
+    puts("==> Extracting matches from Cliques ...");
     printAllMatches(hashTable, fptr);
-    puts("------ MISS MATCHES ------");
+    puts("==> Extracting miss-matches from Cliques ...");
     printAllMissMatches(hashTable, fptr_miss);
 
     resetAllPrintedStatus(hashTable);
@@ -36,28 +36,21 @@ int main(int argc, char **argv)
     fclose(fptr);
     fclose(fptr_miss);
 
-    Vector *stopwords = readCsvToVector("./Datasets/stopwords.csv");
+    puts("==> Creating from W+ Training, Evaluation and Test datasets ...");
+    createPairDatasets();
 
-    createIDFvector(hashTable, stopwords);
-    double *w_array = model_fittingV2(hashTable, getTrainingPairsVector());
-    puts("==> Model training done...");
-    // for (int i = 0; i < 3000; i++)
-    // {
-    //     printf("w[%d] : %f || ", i, w_array[i]);
-    // }
-    modelEvaluation(hashTable, getEvaluationPairsVector(), w_array);
+    HashTable_gen *stopwordsHTable = saveStopwords("./Datasets/stopwords.csv");
 
-    puts("==> De-allocating structures...");
-    freePairVector((Vector *)getTrainingPairsVector);
-    freePairVector((Vector *)getEvaluationPairsVector);
-*/
+    createTFIDFvectors(hashTable, stopwordsHTable);
+    //printTFIDFvectors(hashTable);
+
     //  From here on the part 3 will be implemented
 
     //  1.  Analyze and vectorize all Json in X with tf-idf
-  
+
     HashTable *hash_table = initHashTable(count_datafiles(datasetX));
     read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
- 
+
     //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
     //  3.  Shuffle pairs in W --> W+ is the new set
     //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
@@ -72,21 +65,21 @@ int main(int argc, char **argv)
     //      The training of each W?+ set will be done with batches in THREADS using a Job Scheduler (on stochastic gradient descend).
     //  5.1.    In need to define the best values for:
     //              (learing rate, #of threads, batch size, threshold value/step)
+
     //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+).
 
     //double *b = train_weights(hash_table, W1);
-    
+
     //b = train_weights_testing(W1, T, b);
 
     //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
-    //validate_model(V, b);
+    //validate_model(V, b, test_values);
 
+    freeHashTable(hashTable);
 
-
-    freeHashTable(hash_table);
     //freeVector(stopwords);
 
     clock_t end = clock();

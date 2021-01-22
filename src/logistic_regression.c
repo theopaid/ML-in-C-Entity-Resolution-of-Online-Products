@@ -201,7 +201,8 @@ double f_linear_functionV2(int size, double *tf_idfSum, double *w_array)
 Vector *findTF_IDFvector(HashTable *hashTable, char *specId)
 {
   SpecInfo *specInfo = searchHashTable(hashTable, specId)->cliquePtr->specInfo;
-  return specInfo->tf_idfVectorFinal;
+  //return specInfo->tf_idfVectorFinal;
+  return NULL;
 }
 
 double *calcTF_IDFsum(Vector *leftSpecIdVector, Vector *rightSpecIdVector)
