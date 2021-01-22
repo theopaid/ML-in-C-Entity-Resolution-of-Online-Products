@@ -27,7 +27,7 @@ struct Observation
     char *rightSpecId;
     Vector *left_tf_idf;
     Vector *right_tf_idf;
-    int isMatch;
+    double isMatch;
     Observation *next;
 };
 

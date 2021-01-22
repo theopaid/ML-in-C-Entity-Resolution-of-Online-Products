@@ -2,18 +2,20 @@
 #define _MULTI_THRD_
 
 #include "../hdr/hash.h"
+#include "../hdr/hash_Wplus.h"
 #include "../hdr/vectorImpl.h"
 
-#define LEARNING_RATE 0.07
-#define THREADS_NUM 2
-#define BATCH_SIZE 750
-#define NEW_PAIRS_SIZE 500
-#define THRESHOLD_VALUE 0.3
-#define THRESHOLD_STEP 0.2
+#define LEARNING_RATE 0.2
+#define THREADS_NUM 6
+#define BATCH_SIZE 1000
+#define NEW_PAIRS_SIZE 1000
+#define THRESHOLD_VALUE 0.2
+#define THRESHOLD_STEP 0.13
 #define THRESHOLD_SLOPE 1
-#define WEIGHTS_START_VAL 10.0
+#define WEIGHTS_START_VAL 0.5
 #define TF_IDF_SIZE 1000
-#define E_VALUE 0.00001
+#define E_VALUE 0.0001
+#define WEIGHT_TR_NUM 5
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 
@@ -181,5 +183,5 @@ double *thrd_model_training_wghts(Vector *pairs, double *b);
 
 SpecInfo *hashtable_find_random_spec(HashTable *hash_table);
 
-PairInfo_w *get_first_pair_w(HashTable_w *W1);
+Observation *get_first_pair_w(HashTable_w *W1);
 #endif

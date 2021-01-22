@@ -88,7 +88,7 @@ Observation *initObservation(char *leftSpecId, char *rightSpecId, int isMatch)
 Observation *searchHashTable_w(HashTable_w *hashTable, char *leftSpecId, char *rightSpecId)
 {
     int posInHashTable = hashFunction_w(leftSpecId, rightSpecId) % hashTable->size;
-    if (hashTable->hashArray[posInHashTable] == NULL)
+    if (hashTable->hashArray[posInHashTable] == NULL || hashTable->hashArray[posInHashTable]->observationsList == NULL )
         return NULL;
     return searchChain_w(hashTable->hashArray[posInHashTable]->observationsList, leftSpecId, rightSpecId);
 }
@@ -98,12 +98,14 @@ Observation *searchChain_w(Observation *observationListHead, char *leftSpecId, c
     Observation *listPtr = observationListHead;
     while (listPtr != NULL)
     {
-        char *string1 = listPtr->leftSpecId;
+        /*char *string1 = listPtr->leftSpecId;
         char *string2 = listPtr->rightSpecId;
         if ((same_string(leftSpecId, string1) && same_string(rightSpecId, string2)) || (same_string(leftSpecId, string2) && same_string(rightSpecId, string1)))
         { // found
             break;
-        }
+        }*/
+        if ( listPtr->leftSpecId == NULL || listPtr->rightSpecId == NULL ) return NULL;
+        if ( strcmp(leftSpecId, listPtr->leftSpecId) == 0 && strcmp(rightSpecId, listPtr->rightSpecId) == 0 ) break;
         listPtr = listPtr->next;
     }
     return listPtr;
