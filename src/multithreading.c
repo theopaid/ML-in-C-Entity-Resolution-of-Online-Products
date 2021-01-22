@@ -22,22 +22,23 @@ void *thread_func(void *arg)
         Job *job;
         QueueNode *qn;
 
-        pthread_mutex_lock(((thread_args_t *)arg)->mt);
+        
         if (isempty(((thread_args_t *)arg)->q))
         {
             //printf("block on cv: %d\n", ((thread_args_t*)arg)->cv);
             pthread_cond_signal(((thread_args_t *)arg)->cv);
-            pthread_mutex_unlock(((thread_args_t *)arg)->mt);
+            //pthread_mutex_unlock(((thread_args_t *)arg)->mt);
             return NULL;
         }
 
+        pthread_mutex_lock(((thread_args_t *)arg)->mt);
         qn = queue_pop(((thread_args_t *)arg)->q);
         pthread_mutex_unlock(((thread_args_t *)arg)->mt);
 
         job = qn->data;
         job->function_execute(job->any_parameter);
 
-        //free(job->any_parameter);
+        free(job->any_parameter);
         free(job);
         free(qn);
     }
@@ -84,7 +85,7 @@ void scheduler_destroy(JobScheduler *sch)
     ec_nzero(pthread_cond_destroy(&sch->cv), "failed cond destroy");
     for (int i = 0; i < sch->threads; i++)
     {
-        ec_nzero(pthread_cancel(sch->tids[i]), "failed pthread cancel");
+        //ec_nzero(pthread_cancel(sch->tids[i]), "failed pthread cancel");
         ec_nzero(pthread_join(sch->tids[i], NULL), "failed pthread join");
     }
     free(sch->thread_args);
@@ -179,6 +180,8 @@ Vector *train_weights_testing(HashTable_w *W1, HashTable_w *T, Vector *weights)
     return NULL;
 }
 
+double timeSpentTraining;
+
 double *train_weights(HashTable *hash_table, HashTable_w *W1)
 {
     puts("==> Initiating model TRAINING ...");
@@ -189,9 +192,12 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
 
     while ( threshold < 0.5 ) {
         puts("==> Training model weights ...");
-        printf("==> Threads that will be used: %d ...\n", THREADS_NUM);
+        printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
+        clock_t train_start = clock();
         b = thrd_model_training_wghts(full_W_pairs, b); // !THREADS
-
+        clock_t train_end = clock();
+        timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
+        printf("==> +++ Training Time %f\n", timeSpentTraining);
         Observation *new_pair_not_in_W;
         puts("==> Adding new pairs to training set ...");
         int pairs_count = 0;
@@ -200,7 +206,8 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
             new_pair_not_in_W = get_pair_in_x_excl_set(hash_table, W1);
             double px = p_logistic_function_full(new_pair_not_in_W, b);
             new_pair_not_in_W->isMatch = px;
-            if (px > 1 - threshold)
+            //printf("+++ ( %f ) --- %f \n", px, 1-threshold);
+            if (px > 1 - threshold  || px < threshold)
             {
                 //printf("+++ Value passes: %f\n", px);
                 pairs_count++;
@@ -253,11 +260,12 @@ void calculate_dj(void *param) {
                 sum *= ((tf_idfInfo*)((Observation*)((CalculateDJ*)param)->pairs->items[i])->right_tf_idf->items[j-TF_IDF_SIZE])->tf_idfValue ;
             }
         }
-        sum = sum/BATCH_SIZE;
+        sum = sum/((double)BATCH_SIZE);
 
         pthread_mutex_lock(&dj_access);
         dj[j] += sum;
         pthread_mutex_unlock(&dj_access);
+        
     }
 }
 
@@ -270,10 +278,11 @@ double *thrd_model_training_wghts(Vector *pairs, double *b) {
     int times_inserted, count = 1;
     if ( pairs->itemsInserted <= BATCH_SIZE ) times_inserted = 1;
     else times_inserted = pairs->itemsInserted / BATCH_SIZE + 1;
-
     //printf("Times inserted : %d\n", times_inserted);
+    // int flag = 0;
     while ( count <= WEIGHT_TR_NUM ) {
-        printf("==> Training weights times %d ...\n", count);
+        pthread_mutex_init(&dj_access, NULL);
+        //printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(THREADS_NUM);
         for ( int i = 1 ; i < times_inserted+1 ; i++ ) {
             Job *new_job = (Job*)safe_malloc(sizeof(Job));
@@ -285,23 +294,25 @@ double *thrd_model_training_wghts(Vector *pairs, double *b) {
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
         }
+        //puts("==> Executing all jobs ...");
         scheduler_execute_all(sch);
         scheduler_wait_finish(sch);
         for ( int i = 0 ; i < TF_IDF_SIZE*2 ; i++ ) {
             b[i] = b[i] - LEARNING_RATE*dj[i];
         }
+        //puts("==> Executed all jobs COMPLETED ...");
         count++;
-        //flag = 1;
-        /*for ( int i = 0; i < TF_IDF_SIZE*2 ; i++ ) {
+        /*flag = 1;
+        for ( int i = 0; i < TF_IDF_SIZE*2 ; i++ ) {
             if ( -LEARNING_RATE*dj[i] > E_VALUE ) {
                 flag = 0;
                 break;
             }
         }*/
-        scheduler_destroy(sch); 
+        scheduler_destroy(sch);
+        pthread_mutex_destroy(&dj_access); 
     }
     puts("==> Training model weights COMPLETED ...");
-
     free(dj);
     return b;
 }
