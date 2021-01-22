@@ -13,6 +13,8 @@
 #define THRESHOLD_STEP 0.2
 #define THRESHOLD_SLOPE 1
 #define WEIGHTS_START_VAL 10.0
+#define TF_IDF_SIZE 1000
+#define E_VALUE 0.00001
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 void *thread_func(void *arg);
@@ -24,6 +26,7 @@ typedef struct Job Job;
 typedef struct thread_args thread_args_t;
 
 typedef struct Observation Observation;
+typedef struct CalculateDJ CalculateDJ;
 
 struct JobScheduler {
     int threads;
@@ -44,6 +47,13 @@ struct thread_args {
 
 struct Job {
     void (*function_execute)(void *p); // can point to any function (task) with parameters or NULL
+    void *any_parameter;
+};
+
+struct CalculateDJ {
+    Vector *pairs;
+    double *b;
+    int place;
 };
 
 struct Queue {
@@ -105,7 +115,6 @@ void validate_model(HashTable_w *V, Vector *weights);
 
 
 /* Model Training with threads */
-
 struct Observation {
     char *left_spec_id;
     char *right_spec_id;
@@ -165,6 +174,13 @@ void resolve_transitivity(HashTable *hash_table, Observation *pair, HashTable_w 
  */
 void print_positive_set(HashTable_w *W1);
 
+/**
+ * @brief Train the model given the set in Vector and with certain weights. The stochastic descend part is implemented with threads.
+ * @param pairs The vector containing Observation pairs of the training set.
+ * @param b The array with the weights.
+ * @returns The array with the new weights calculated with stochastic descend.
+ */
+double *thrd_model_training_wghts(Vector *pairs, double *b);
 
 SpecInfo *hashtable_find_random_spec(HashTable *hash_table);
 
