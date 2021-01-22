@@ -6,16 +6,16 @@
 #include "../hdr/vectorImpl.h"
 
 #define LEARNING_RATE 0.2
-#define THREADS_NUM 6
+#define THREADS_NUM 3
 #define BATCH_SIZE 1000
 #define NEW_PAIRS_SIZE 1000
-#define THRESHOLD_VALUE 0.2
-#define THRESHOLD_STEP 0.13
+#define THRESHOLD_VALUE 0.3
+#define THRESHOLD_STEP 0.1
 #define THRESHOLD_SLOPE 1
 #define WEIGHTS_START_VAL 0.5
 #define TF_IDF_SIZE 1000
-#define E_VALUE 0.0001
-#define WEIGHT_TR_NUM 5
+#define E_VALUE 0.0000001
+#define WEIGHT_TR_NUM 10
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 
