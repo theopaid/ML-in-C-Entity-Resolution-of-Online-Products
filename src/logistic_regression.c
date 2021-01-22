@@ -211,7 +211,7 @@ double *calcTF_IDFsum(Vector *leftSpecIdVector, Vector *rightSpecIdVector)
   double *tf_idfSum = (double *)safe_malloc(itemsCount * sizeof(double));
   for (int i = 0; i < itemsCount; i++)
   {
-    tf_idfSum[i] = ((tf_idfInfo *)leftSpecIdVector->items[i])->tf_idfValue + ((tf_idfInfo *)rightSpecIdVector->items[i])->tf_idfValue;
+    //tf_idfSum[i] = ((tf_idfInfo *)leftSpecIdVector->items[i])->tf_idfValue + ((tf_idfInfo *)rightSpecIdVector->items[i])->tf_idfValue;
     // if (tf_idfSum[i] != 0)
     //     printf("SUM: %f\n", tf_idfSum[i]);
   }
