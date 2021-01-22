@@ -171,7 +171,6 @@ int insertInIDFchain(HashBucket_gen *bucketDst, char *word)
 ///////////////// CALCULATIONS FOR FINAL TF_IDF VALUES ///////////////////////
 void calculateFinalIDF(HashTable_gen *hashTable)
 {
-    int totalWords = hashTable->itemsInserted;
     int htableSize = hashTable->size;
     idfInfo *listPtr = NULL;
     for (int i = 0; i < htableSize; i++)
@@ -312,6 +311,7 @@ void createTFIDFvectors(HashTable *mainHTable, HashTable_gen *stopwordsHTable_)
 {
     if (mainHTable == NULL)
         return;
+    puts("==> Creating the tf-idf Vectors for each Spec ...");
 
     idfHTable = initHashTable_gen(AVG_TOTAL_WORDS);
     stopwordsHTable = stopwordsHTable_;

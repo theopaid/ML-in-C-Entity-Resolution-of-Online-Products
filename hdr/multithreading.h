@@ -14,7 +14,14 @@
 #define WEIGHTS_START_VAL 10.0
 #define TF_IDF_SIZE 1000
 
-#define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
+#define ec_nzero(call, msg) \
+    {                       \
+        if ((call) < 0)     \
+        {                   \
+            perror(msg);    \
+            exit(1);        \
+        }                   \
+    }
 void *thread_func(void *arg);
 
 typedef struct QueueNode QueueNode;
@@ -25,33 +32,38 @@ typedef struct thread_args thread_args_t;
 
 typedef struct Observation Observation;
 
-struct JobScheduler {
+struct JobScheduler
+{
     int threads;
     Queue *q;
     pthread_t *tids;
-    pthread_cond_t cv;  // q_has_item
-    pthread_mutex_t mt; // queue lock mutex
+    pthread_cond_t cv;         // q_has_item
+    pthread_mutex_t mt;        // queue lock mutex
     pthread_barrier_t barrier; // thread barrier for simultaneous execution
     thread_args_t *thread_args;
 };
 
-struct thread_args {
+struct thread_args
+{
     pthread_mutex_t *mt;
     pthread_cond_t *cv;
     pthread_barrier_t *barrier;
     Queue *q;
 };
 
-struct Job {
+struct Job
+{
     void (*function_execute)(void *p); // can point to any function (task) with parameters or NULL
 };
 
-struct Queue {
+struct Queue
+{
     QueueNode *head;
     int size;
 };
 
-struct QueueNode {
+struct QueueNode
+{
     void *data; // can point to any data type, in this case we want an initialized Job pointer passed to it
     QueueNode *next;
 };
@@ -64,12 +76,11 @@ void scheduler_execute_all(JobScheduler *sch);
 void scheduler_wait_finish(JobScheduler *sch);
 
 /* queue operations */
-Queue* initialize_queue();
+Queue *initialize_queue();
 void destroy_queue(Queue *q);
 void add(Queue *q, QueueNode *nn);
 int isempty(Queue *q);
 QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
-
 
 /**
  * @brief Make 3 new vectors using items in a specified vector. Percentages are 60%, 20% and 20%.
@@ -103,16 +114,7 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1);
  */
 void validate_model(HashTable_w *V, Vector *weights);
 
-
 /* Model Training with threads */
-
-struct Observation {
-    char *left_spec_id;
-    char *right_spec_id;
-    Vector *left_tf_idf;
-    Vector *right_tf_idf;
-    int is_match;
-};
 
 /**
  * @brief Given the hash table with the specs tf-idf vector and the hash table with the pairs of specs, create a vector with the Observations in pairs.
@@ -164,7 +166,6 @@ void resolve_transitivity(HashTable *hash_table, Observation *pair, HashTable_w 
  * @param W1 The hash table with the pairs and their matching estimation.
  */
 void print_positive_set(HashTable_w *W1);
-
 
 SpecInfo *hashtable_find_random_spec(HashTable *hash_table);
 

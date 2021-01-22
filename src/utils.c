@@ -98,10 +98,10 @@ void printInsights()
     puts(" ");
     puts("|========== Insights ==========|");
     puts(" ");
-    printHashingBenchmarks();
+    //printHashingBenchmarks();
     printMatchesCount();
     printMissMatchesCount();
-    printVisitedSpecNodesCount();
+    //printVisitedSpecNodesCount();
     printExecTime();
     puts(" ");
     puts("|==============================|");

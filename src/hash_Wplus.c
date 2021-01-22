@@ -1,6 +1,11 @@
 #include "../hdr/includes.h"
 
-HashTable_w *initHashTable_w(int pairsSum)
+HashTable_w *trainingSet_HTable;
+HashTable_w *evaluationSet_HTable;
+HashTable_w *testSet_HTable;
+
+HashTable_w *
+initHashTable_w(int pairsSum)
 {
     int bucketsToAlloc = pairsSum / 0.5; // we need a load factor of at least 70%, to minimize collisions
                                          // let's double the size here
@@ -8,6 +13,7 @@ HashTable_w *initHashTable_w(int pairsSum)
 
     HashTable_w *newHashTable = (HashTable_w *)safe_malloc(sizeof(HashTable_w));
     newHashTable->size = bucketsToAlloc;
+    newHashTable->itemsInserted = 0;
     newHashTable->hashArray = (HashBucket_w **)safe_calloc(bucketsToAlloc, sizeof(HashBucket_w *));
 
     for (int i = 0; i < bucketsToAlloc; i++)
@@ -34,57 +40,62 @@ unsigned long long hashFunction_w(char *string1, char *string2)
     return h;
 }
 
-void addToHashTable_w(HashTable_w *hashTable, PairInfo_w *newPairInfo)
+void addToHashTable_w(HashTable_w *hashTable, Observation *newObservation)
 {
-    unsigned long long hash = hashFunction_w(newPairInfo->leftSpecId, newPairInfo->rightSpecId);
+    hashTable->itemsInserted++;
+    unsigned long long hash = hashFunction_w(newObservation->leftSpecId, newObservation->rightSpecId);
     long posInHashTable = hash % hashTable->size;
 
     if (hashTable->hashArray[posInHashTable] == NULL)
     {
         hashTable->hashArray[posInHashTable] = (HashBucket_w *)safe_malloc(sizeof(HashBucket_w));
-        hashTable->hashArray[posInHashTable]->pairsList = NULL;
+        hashTable->hashArray[posInHashTable]->observationsList = NULL;
     }
-    insertInChain_w(hashTable->hashArray[posInHashTable], newPairInfo);
+    insertInChain_w(hashTable->hashArray[posInHashTable], newObservation);
 }
 
-void insertInChain_w(HashBucket_w *bucketDst, PairInfo_w *newPairInfo)
+void insertInChain_w(HashBucket_w *bucketDst, Observation *newObservation)
 {
-    if (bucketDst->pairsList == NULL)
+    if (bucketDst->observationsList == NULL)
     {
-        bucketDst->pairsList = newPairInfo;
+        bucketDst->observationsList = newObservation;
         return;
     }
 
-    PairInfo_w *pairsListPtr = bucketDst->pairsList;
-    while (pairsListPtr->nextPair != NULL)
+    Observation *observationPtrList = bucketDst->observationsList;
+    while (observationPtrList->next != NULL)
     {
-        pairsListPtr = pairsListPtr->nextPair;
+        observationPtrList = observationPtrList->next;
     }
-    pairsListPtr->nextPair = newPairInfo;
+    observationPtrList->next = newObservation;
 }
 
-PairInfo_w *initPairInfo_w(char *leftSpecId, char *rightSpecId, int isMatch)
+Observation *initObservation(char *leftSpecId, char *rightSpecId, int isMatch)
 {
-    PairInfo_w *newPairInfo = safe_malloc(sizeof(PairInfo_w));
-    newPairInfo->leftSpecId = createString(leftSpecId);
-    newPairInfo->rightSpecId = createString(rightSpecId);
-    newPairInfo->isMatch = isMatch;
-    newPairInfo->nextPair = NULL;
+    Observation *newObservation = (Observation *)safe_malloc(sizeof(Observation));
+    newObservation->leftSpecId = createString(leftSpecId);
+    newObservation->rightSpecId = createString(rightSpecId);
+    newObservation->isMatch = isMatch;
+    SpecInfo *leftspecInfo = searchHashTable(getMainHTable(), leftSpecId)->cliquePtr->specInfo;
+    newObservation->left_tf_idf = leftspecInfo->tfidf_vector;
+    SpecInfo *rightSpecInfo = searchHashTable(getMainHTable(), rightSpecId)->cliquePtr->specInfo;
+    newObservation->right_tf_idf = rightSpecInfo->tfidf_vector;
+    newObservation->next = NULL;
 
-    return newPairInfo;
+    return newObservation;
 }
 
-PairInfo_w *searchHashTable_w(HashTable_w *hashTable, char *leftSpecId, char *rightSpecId)
+Observation *searchHashTable_w(HashTable_w *hashTable, char *leftSpecId, char *rightSpecId)
 {
     int posInHashTable = hashFunction_w(leftSpecId, rightSpecId) % hashTable->size;
     if (hashTable->hashArray[posInHashTable] == NULL)
         return NULL;
-    return searchChain_w(hashTable->hashArray[posInHashTable]->pairsList, leftSpecId, rightSpecId);
+    return searchChain_w(hashTable->hashArray[posInHashTable]->observationsList, leftSpecId, rightSpecId);
 }
 
-PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *leftSpecId, char *rightSpecId)
+Observation *searchChain_w(Observation *observationListHead, char *leftSpecId, char *rightSpecId)
 {
-    PairInfo_w *listPtr = pairsListHead;
+    Observation *listPtr = observationListHead;
     while (listPtr != NULL)
     {
         char *string1 = listPtr->leftSpecId;
@@ -93,19 +104,19 @@ PairInfo_w *searchChain_w(PairInfo_w *pairsListHead, char *leftSpecId, char *rig
         { // found
             break;
         }
-        listPtr = listPtr->nextPair;
+        listPtr = listPtr->next;
     }
     return listPtr;
 }
 
-void freePairInfo_w(PairInfo_w *pairInfoNode)
+void freeObservationsList(Observation *listPtr)
 {
-    if (pairInfoNode == NULL)
+    if (listPtr == NULL)
         return;
-    freePairInfo_w(pairInfoNode->nextPair);
-    free(pairInfoNode->leftSpecId);
-    free(pairInfoNode->rightSpecId);
-    free(pairInfoNode);
+    freeObservationsList(listPtr->next);
+    free(listPtr->leftSpecId);
+    free(listPtr->rightSpecId);
+    free(listPtr);
 }
 
 void freeHashBucket_w(HashBucket_w *hashBucket)
@@ -114,7 +125,7 @@ void freeHashBucket_w(HashBucket_w *hashBucket)
     {
         return;
     }
-    freePairInfo_w(hashBucket->pairsList);
+    freeObservationsList(hashBucket->observationsList);
     free(hashBucket);
 }
 
@@ -128,4 +139,76 @@ void freeHashTable_w(HashTable_w *hashTable)
     }
     free(hashTable->hashArray);
     free(hashTable);
+}
+
+/**
+ * Mix matches and miss-matches pairs
+ * */
+void createPairDatasets()
+{
+    Vector *matchesVector = getMatchesVector();
+    Vector *missMatchesVEctor = getMissMatchesVector();
+    int totalMatches = vectorItemsCount(matchesVector);
+    int totalMissMatches = vectorItemsCount(missMatchesVEctor);
+    int trainingSetPairs = (totalMatches + totalMissMatches) * 0.6;
+    int evaluationSetPairs = (totalMatches + totalMissMatches) * 0.2;
+    int testSetPairs = (totalMatches + totalMissMatches) - trainingSetPairs - evaluationSetPairs;
+    trainingSet_HTable = initHashTable_w(trainingSetPairs);
+    evaluationSet_HTable = initHashTable_w(evaluationSetPairs);
+    testSet_HTable = initHashTable_w(testSetPairs);
+    int matchesCounter = 0, missMatchesCounter = 0, totalPairsInserted = 0;
+    HashTable_w *htableToInsert = trainingSet_HTable;
+    for (int i = 0; i < totalMissMatches; i++)
+    {
+        missMatchesCounter++;
+        Observation *currObservation = vectorGet(missMatchesVEctor, i);
+        if (totalPairsInserted > trainingSetPairs)
+        {
+            if (totalPairsInserted > (trainingSetPairs + evaluationSetPairs))
+                htableToInsert = testSet_HTable;
+            else
+                htableToInsert = evaluationSet_HTable;
+        }
+        if (1)
+        {
+            addToHashTable_w(htableToInsert, currObservation);
+            totalPairsInserted++;
+        }
+        if ((missMatchesCounter >= 5) && (matchesCounter < totalMatches))
+        {
+            currObservation = vectorGet(matchesVector, matchesCounter);
+            if (totalPairsInserted > trainingSetPairs)
+            {
+                if (totalPairsInserted > (trainingSetPairs + evaluationSetPairs))
+                    htableToInsert = testSet_HTable;
+                else
+                    htableToInsert = evaluationSet_HTable;
+            }
+            if (1)
+            {
+                addToHashTable_w(htableToInsert, currObservation);
+                totalPairsInserted++;
+            }
+            matchesCounter++;
+            missMatchesCounter = 0;
+        }
+    }
+
+    freeVectorWithoutItems(getMatchesVector());
+    freeVectorWithoutItems(getMissMatchesVector());
+}
+
+HashTable_w *getTrainingSet()
+{
+    return trainingSet_HTable;
+}
+
+HashTable_w *getEvaluationSet()
+{
+    return evaluationSet_HTable;
+}
+
+HashTable_w *getTestSet()
+{
+    return testSet_HTable;
 }
