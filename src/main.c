@@ -17,10 +17,13 @@ int main(int argc, char **argv)
     puts(datasetW);
     puts(datasetX);
 
+    //  1.  Analyze all Json in X and pairs in W to form Cliques. W+ is the new set with Clique relationships.
+    
     HashTable *hashTable = initHashTable(count_datafiles(datasetX));
-
+    puts("==> Reading Dataset X ...");
     read_from_dir(datasetX, hashTable);
 
+    puts("==> Reading Dataset W and making Cliques / Anti-cliques ...");
     readDictionary(datasetW, hashTable);
 
     FILE *fptr = open_file("./output/matches.txt");
@@ -36,52 +39,43 @@ int main(int argc, char **argv)
     fclose(fptr);
     fclose(fptr_miss);
 
-    puts("==> Creating from W+ Training, Evaluation and Test datasets ...");
-    createPairDatasets();
+    //  2.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
+    
+    puts("==> Creating from W+ : Training, Evaluation and Test datasets ...");
+    createPairDatasets(); //  result in global trainingSet_HTable, evaluationSet_HTable, testSet_HTable
 
     HashTable_gen *stopwordsHTable = saveStopwords("./Datasets/stopwords.csv");
-
+    
+    //  3.  Calculate tf-idf and reduce dimensions to 1000 top words for each Json.
+       
     createTFIDFvectors(hashTable, stopwordsHTable);
+    freeHashTable_gen(stopwordsHTable);
     //printTFIDFvectors(hashTable);
 
-    //  From here on the part 3 will be implemented
-
-    //  1.  Analyze and vectorize all Json in X with tf-idf
-
-    HashTable *hash_table = initHashTable(count_datafiles(datasetX));
-    read_from_dir(datasetX, hash_table); // Read datasetX to hashTable
-
-    //  2.  Reduce dimensions to ex. 1000, 500, ..., most significant values (words with highest average tf-idf)
-    //  3.  Shuffle pairs in W --> W+ is the new set
-    //  4.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
-
-    // Vector *W1, *T, *V;
-    //make_model_sets(hash_table, W1, T, V);
-
-    //  5.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
+    //  4.  Train the model with W1+ and all the pairs in X that don't belong to the set W1+ using a defined threshhold.
     //      This way, the training set W?+ will be enhanced with new pairs that satisfy the threshhold condition.
     //      The threshold will be tested with stable increase, or with increased increasement.
     //      What we get is the b (weight vector) values for each word (dimension) of the WN+ training set.
     //      The training of each W?+ set will be done with batches in THREADS using a Job Scheduler (on stochastic gradient descend).
-    //  5.1.    In need to define the best values for:
+    //  4.1.    In need to define the best values for:
     //              (learing rate, #of threads, batch size, threshold value/step)
-
     //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+).
 
-    //double *b = train_weights(hash_table, W1);
+    HashTable_w *W1 = getTrainingSet();
+    //HashTable_w *T = getTestSet();
+    //HashTable_w *V = getEvaluationSet();
+    double *b = train_weights(hashTable, W1);
 
     //b = train_weights_testing(W1, T, b);
 
-    //  6.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
+    //  5.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
     //validate_model(V, b, test_values);
 
     freeHashTable(hashTable);
-
-    //freeVector(stopwords);
-
+    free(b);
     clock_t end = clock();
     timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
     printInsights();
