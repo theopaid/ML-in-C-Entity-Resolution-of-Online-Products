@@ -62,45 +62,18 @@ int main(int argc, char **argv)
     //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+).
 
     HashTable_w *W1 = getTrainingSet();
+    Vector *full_W_pairs = vectorize_all_pairs(hashTable, W1);
     HashTable_w *T = getTestSet();
+    Vector *full_T_pairs = vectorize_all_pairs(hashTable, T);
     HashTable_w *V = getEvaluationSet();
+    Vector *full_V_pairs = vectorize_all_pairs(hashTable, V);
     
-    double *b = train_weights(hashTable, W1);
+
+    double *b = train_weights(hashTable, W1, full_W_pairs);
     int threads = 10, batch_size = 1000;
     float threshold = 0.3;
-    double acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
-    puts("==> (*)=======================================(*)");
-    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
-    printf("==> (|) Threads : %d\n", threads);
-    printf("==> (|) Batch size : %d\n", batch_size);
-    printf("==> (|) Threshold : %f\n", threshold);
-    puts("==> (*)=======================================(*)");
+    double acc = model_testing_testing(hashTable, full_T_pairs, b, threads, threshold, batch_size);
 
-    threads = 10;
-    batch_size = 1500;
-    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
-    puts("==> (*)=======================================(*)");
-    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
-    printf("==> (|) Threads : %d\n", threads);
-    printf("==> (|) Batch size : %d\n", batch_size);
-    printf("==> (|) Threshold : %f\n", threshold);
-    puts("==> (*)========================================(*)");
-
-    threads = 10;
-    batch_size = 500;
-    threshold = 0.3;
-    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
-    puts("==> (*)=======================================(*)");
-    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
-    printf("==> (|) Threads : %d\n", threads);
-    printf("==> (|) Batch size : %d\n", batch_size);
-    printf("==> (|) Threshold : %f\n", threshold);
-    puts("==> (*)=======================================(*)");
-
-    threads = 10;
-    batch_size = 1000;
-    threshold = 0.2;
-    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
     puts("==> (*)=======================================(*)");
     printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
     printf("==> (|) Threads : %d\n", threads);
@@ -112,7 +85,7 @@ int main(int argc, char **argv)
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
-    acc = model_testing(hashTable, V, b);
+    acc = model_testing(hashTable, full_V_pairs, b);
     printf("==> (+) Model validation accuracy : [%f]%% \n", acc*100);
 
     freeHashTable(hashTable);

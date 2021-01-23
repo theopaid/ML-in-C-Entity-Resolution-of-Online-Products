@@ -40,7 +40,8 @@ struct JobScheduler
     int threads;
     Queue *q;
     pthread_t *tids;
-    pthread_cond_t cv;         // q_has_item
+    pthread_mutex_t mtcv;      // mutex for finish
+    pthread_cond_t cv;         // threads have finished
     pthread_mutex_t mt;        // queue lock mutex
     pthread_barrier_t barrier; // thread barrier for simultaneous execution
     thread_args_t *thread_args;
@@ -49,6 +50,7 @@ struct JobScheduler
 struct thread_args
 {
     pthread_mutex_t *mt;
+    pthread_mutex_t *mtcv;
     pthread_cond_t *cv;
     pthread_barrier_t *barrier;
     Queue *q;
@@ -107,7 +109,7 @@ QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
  * @param full_W_pairs The training set vectorized with Observations.
  * @returns The vector with the weights calculated by the training.
  */
-double *train_weights(HashTable *hash_table, HashTable_w *W1);
+double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pairs);
 
 /**
  * @brief Validate the model using pairs in V, given weights and print the resulting accuracy.
@@ -182,8 +184,8 @@ SpecInfo *hashtable_find_random_spec(HashTable *hash_table);
 
 Observation *get_first_pair_w(HashTable_w *W1);
 
-double model_testing(HashTable *hash_table, HashTable_w *T, double *b);
+double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b);
 
-double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, int threads, float threshold, int batch_size);
+double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double *b, int threads, float threshold, int batch_size);
 
 #endif
