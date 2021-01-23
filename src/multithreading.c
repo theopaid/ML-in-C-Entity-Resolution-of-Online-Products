@@ -170,7 +170,6 @@ QueueNode *queue_pop(Queue *q)
 }
 
 
-
 void calculate_accuracy(void *param)
 {
     int items_start = ((CalculateAccuracy *)param)->place;
@@ -401,6 +400,7 @@ void calculate_dj(void *param)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
+
             }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
             //printf("(++++++++) IN WEIGHT: %f\n", px);
@@ -428,7 +428,9 @@ void calculate_dj(void *param)
 
 double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 {
+
     pthread_mutex_init(&dj_access, NULL);
+
     dj = (double *)safe_calloc(TF_IDF_SIZE * 2, sizeof(double));
     for (int i = 0; i < TF_IDF_SIZE * 2; i++)
     {
@@ -444,7 +446,9 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
     // int flag = 0;
     while (count <= WEIGHT_TR_NUM)
     {
+
         
+
         //printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
         for (int i = 1; i < times_inserted + 1; i++)
@@ -477,7 +481,8 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
             }
         }*/
         scheduler_destroy(sch);
-        
+     
+
     }
     puts("==> Training model weights COMPLETED ...");
     pthread_mutex_destroy(&dj_access);
