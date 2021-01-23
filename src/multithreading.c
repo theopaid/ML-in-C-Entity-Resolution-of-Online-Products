@@ -453,7 +453,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 
         printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
-        for (int i = 1; i < times_inserted ; i++)
+        for (int i = 1; i < times_inserted+1 ; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateDJ *to_pass = (CalculateDJ *)safe_malloc(sizeof(CalculateDJ));
@@ -465,12 +465,12 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
         }
-        //puts("==> Executing all jobs ...");
+        puts("==> Executing all jobs ...");
         scheduler_execute_all(sch);
-        //puts("==> Waiting to finish ...");
+        puts("==> Waiting to finish ...");
         scheduler_wait_finish(sch);
-        //puts("==> Calculating final dJ ...");
-        scheduler_destroy(sch);
+        puts("==> Calculating final dJ ...");
+
         for (int i = 0; i < TF_IDF_SIZE * 2; i++)
         {
             dj[i] = dj[i] / ((double)times_inserted);
@@ -485,6 +485,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
                 break;
             }
         }*/
+        scheduler_destroy(sch);
     }
     puts("==> Training model weights COMPLETED ...");
     pthread_mutex_destroy(&dj_access);
