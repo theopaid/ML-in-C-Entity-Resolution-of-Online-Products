@@ -68,10 +68,12 @@ int main(int argc, char **argv)
     HashTable_w *V = getEvaluationSet();
     Vector *full_V_pairs = vectorize_all_pairs(hashTable, V);
     
+
     double *b = train_weights(hashTable, W1, full_W_pairs);
     int threads = 10, batch_size = 1000;
     float threshold = 0.3;
     double acc = model_testing_testing(hashTable, full_T_pairs, b, threads, threshold, batch_size);
+
     puts("==> (*)=======================================(*)");
     printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
     printf("==> (|) Threads : %d\n", threads);

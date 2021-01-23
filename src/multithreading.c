@@ -250,6 +250,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     {
         accuracy += testAccuracy[i];
     }
+
     accuracy = accuracy / ((double)test_acc_arr_size);
     puts("==> Model testing COMPLETED ...");
     clock_t testing_end = clock();
@@ -304,11 +305,13 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 
         scheduler_destroy(sch);
     }
+
     for (int i = 0; i < test_acc_arr_size; i++)
     {
         accuracy += testAccuracy[i];
     }
     accuracy = accuracy / ((double)test_acc_arr_size);
+
     puts("==> Model validation COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
@@ -371,6 +374,7 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
     }
+
     puts("==> Model training COMPLETED ...");
     print_positive_set(W1);
 
