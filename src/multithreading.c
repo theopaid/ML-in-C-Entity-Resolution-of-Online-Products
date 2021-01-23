@@ -22,7 +22,6 @@ void *thread_func(void *arg)
         Job *job;
         QueueNode *qn;
 
-        
         if (isempty(((thread_args_t *)arg)->q))
         {
             //printf("block on cv: %d\n", ((thread_args_t*)arg)->cv);
@@ -170,47 +169,187 @@ QueueNode *queue_pop(Queue *q)
     return nj;
 }
 
-void make_model_sets(HashTable *all_set, Vector *set1, Vector *set2, Vector *set3)
+double *testAccuracy;
+
+void calculate_accuracy(void *param)
 {
-    return;
+    int items_start = ((CalculateAccuracy *)param)->place;
+    int items_end = items_start + TEST_BATCH_SIZE;
+    if (items_end > ((CalculateAccuracy *)param)->pairs->itemsInserted)
+        items_end = ((CalculateAccuracy *)param)->pairs->itemsInserted;
+    double hits = 0.0;
+    double no_hits = 0.0;
+    for (int i = items_start; i < items_end; i++)
+    {
+        double px = p_logistic_function_full(((CalculateAccuracy *)param)->pairs->items[i], ((CalculateAccuracy *)param)->b);
+        double y = ((Observation *)((CalculateAccuracy *)param)->pairs->items[i])->isMatch;
+        //printf("==> (+++) ( %f, %f )\n", px, y);
+        if (fabs(px - y) <= 0.5)
+            hits++;
+        else
+            no_hits++;
+    }
+    testAccuracy[((CalculateAccuracy *)param)->i] = (hits) / ((double)TEST_BATCH_SIZE);
 }
 
-Vector *train_weights_testing(HashTable_w *W1, HashTable_w *T, Vector *weights)
+double timeSpentTesting;
+
+double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, int _threads, float _threshold, int _batch_size)
 {
-    return NULL;
+    puts("==> Initiating model TESTING ...");
+    clock_t testing_start = clock();
+    double accuracy = 0.0;
+    Vector *full_T_pairs = vectorize_all_pairs(hash_table, T);
+    float threshold = _threshold;
+
+    int times_inserted;
+    if (full_T_pairs->itemsInserted <= _batch_size)
+        times_inserted = 1;
+    else
+        times_inserted = full_T_pairs->itemsInserted / _batch_size + 1;
+
+    int test_acc_arr_size = 0;
+    if (_threads >= times_inserted)
+        test_acc_arr_size = times_inserted;
+    else
+        test_acc_arr_size = _threads;
+    testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
+
+    while (threshold < 0.5)
+    {
+        //puts("==> Calculating accuracy ... ");
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            testAccuracy[i] = 0.0;
+        }
+        JobScheduler *sch = scheduler_init(_threads);
+        for (int i = 1; i < times_inserted + 1; i++)
+        {
+            Job *new_job = (Job *)safe_malloc(sizeof(Job));
+            CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
+            new_job->function_execute = calculate_accuracy;
+            to_pass->pairs = full_T_pairs;
+            to_pass->b = b;
+            to_pass->i = i;
+            to_pass->place = (i - 1) * TEST_BATCH_SIZE;
+            new_job->any_parameter = to_pass;
+            scheduler_submit_job(sch, new_job);
+        }
+        scheduler_execute_all(sch);
+        scheduler_wait_finish(sch);
+        threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
+        scheduler_destroy(sch);
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            accuracy += testAccuracy[i];
+        }
+        accuracy = accuracy / ((double)test_acc_arr_size);
+    }
+
+    puts("==> Model testing COMPLETED ...");
+    clock_t testing_end = clock();
+    timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
+    printf("==> [+++] Testing Time [ %f ]\n", timeSpentTesting);
+    return accuracy;
 }
+
+double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
+{
+    puts("==> Initiating model VALIDATION ...");
+    clock_t testing_start = clock();
+    double accuracy = 0.0;
+    Vector *full_T_pairs = vectorize_all_pairs(hash_table, T);
+    float threshold = THRESHOLD_VALUE;
+
+    int times_inserted;
+    if (full_T_pairs->itemsInserted <= TEST_BATCH_SIZE)
+        times_inserted = 1;
+    else
+        times_inserted = full_T_pairs->itemsInserted / TEST_BATCH_SIZE + 1;
+
+    int test_acc_arr_size = 0;
+    if (TEST_THREAD_NUM >= times_inserted)
+        test_acc_arr_size = times_inserted;
+    else
+        test_acc_arr_size = TEST_THREAD_NUM;
+    testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
+
+    while (threshold < 0.5)
+    {
+        puts("==> Calculating accuracy ... ");
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            testAccuracy[i] = 0.0;
+        }
+        JobScheduler *sch = scheduler_init(TEST_THREAD_NUM);
+        for (int i = 1; i < times_inserted + 1; i++)
+        {
+            Job *new_job = (Job *)safe_malloc(sizeof(Job));
+            CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
+            new_job->function_execute = calculate_accuracy;
+            to_pass->pairs = full_T_pairs;
+            to_pass->b = b;
+            to_pass->i = i;
+            to_pass->place = (i - 1) * TEST_BATCH_SIZE;
+            new_job->any_parameter = to_pass;
+            scheduler_submit_job(sch, new_job);
+        }
+        scheduler_execute_all(sch);
+        scheduler_wait_finish(sch);
+        threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
+        scheduler_destroy(sch);
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            accuracy += testAccuracy[i];
+        }
+        accuracy = accuracy / ((double)test_acc_arr_size);
+    }
+
+    puts("==> Model validation COMPLETED ...");
+    clock_t testing_end = clock();
+    timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
+    printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
+    return accuracy;
+}
+
 
 double timeSpentTraining;
 
 double *train_weights(HashTable *hash_table, HashTable_w *W1)
 {
     puts("==> Initiating model TRAINING ...");
-    double *b = weight_array_init(TF_IDF_SIZE * 2); // init array based on tf-idfs size
     Vector *full_W_pairs = vectorize_all_pairs(hash_table, W1);
+    double *b = weight_array_init(TF_IDF_SIZE * 2); // init array based on tf-idfs size
     //printf("Total pairs in: %ld, Total pairs vectorized: %d\n", W1->itemsInserted, full_W_pairs->itemsInserted);
     float threshold = THRESHOLD_VALUE;
 
-    while ( threshold < 0.5 ) {
+    while (threshold < 0.5)
+    {
         puts("==> Training model weights ...");
         printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
         clock_t train_start = clock();
-        b = thrd_model_training_wghts(full_W_pairs, b); // !THREADS
+
+        b = thrd_model_training_wghts(full_W_pairs, b, THREADS_NUM); // !THREADS
         clock_t train_end = clock();
         timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
-        printf("==> +++ Training Time %f\n", timeSpentTraining);
+        printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
+
         Observation *new_pair_not_in_W;
         puts("==> Adding new pairs to training set ...");
         int pairs_count = 0;
-        while ( pairs_count < NEW_PAIRS_SIZE )
+        int count = 0;
+        while (pairs_count < NEW_PAIRS_SIZE)
         {
             new_pair_not_in_W = get_pair_in_x_excl_set(hash_table, W1);
             double px = p_logistic_function_full(new_pair_not_in_W, b);
             new_pair_not_in_W->isMatch = px;
             //printf("+++ ( %f ) --- %f \n", px, 1-threshold);
-            if (px > 1 - threshold  || px < threshold)
+
+            if ((px < threshold) || (px > 1 - threshold))
+
             {
                 //printf("+++ Value passes: %f\n", px);
-                pairs_count++;
+                count++;
                 vectorPushBack(full_W_pairs, new_pair_not_in_W);
                 Observation *new_pair = (Observation *)safe_malloc(sizeof(Observation));
                 new_pair->leftSpecId = new_pair_not_in_W->leftSpecId;
@@ -223,44 +362,62 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
                 addToHashTable_w(W1, new_pair);
             }
             free(new_pair_not_in_W);
+            pairs_count++;
         }
-        printf("==> New pairs added: %d ...\n", pairs_count);
-        puts("==> Resolving transitivity issues between pairs ..."); 
+        printf("==> New pairs added: %d ...\n", count);
+        puts("==> Resolving transitivity issues between pairs ...");
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
     }
-    
+
     puts("==> Model training COMPLETED ...");
     print_positive_set(W1);
-  
-    //freeVector(full_W_pairs);
+
     return b;
 }
 
-void calculate_dj(void *param) {
-    int items_start = ((CalculateDJ*)param)->place;
+void calculate_dj(void *param)
+{
+    int items_start = ((CalculateDJ *)param)->place;
     int items_end = items_start + BATCH_SIZE;
-    if ( items_end > ((CalculateDJ*)param)->pairs->itemsInserted) items_end = ((CalculateDJ*)param)->pairs->itemsInserted;
+    if (items_end > ((CalculateDJ *)param)->pairs->itemsInserted)
+        items_end = ((CalculateDJ *)param)->pairs->itemsInserted;
     //printf("Start: %d, End: %d, Inserted: %d\n", items_start, items_end, ((CalculateDJ*)param)->pairs->itemsInserted);
-    for ( int j = 0; j < TF_IDF_SIZE*2 ; j++ ) {
+    for (int j = 0; j < TF_IDF_SIZE * 2; j++)
+    {
         double sum = 0.0;
-        for ( int i = items_start ; i < items_end ; i++ ) {
-            if ( j < TF_IDF_SIZE ) {
-                if ( ((Observation*)((CalculateDJ*)param)->pairs->items[i])->left_tf_idf->itemsInserted <= j ) break;
-                if ( ((Observation*)((CalculateDJ*)param)->pairs->items[i])->left_tf_idf->items[i] == NULL ) continue;
-            } else {
-                if ( ((Observation*)((CalculateDJ*)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j-TF_IDF_SIZE ) break;
-                if ( ((Observation*)((CalculateDJ*)param)->pairs->items[i])->right_tf_idf->items[i] == NULL ) continue;
+        for (int i = items_start; i < items_end; i++)
+        {
+            if (j < TF_IDF_SIZE)
+            {
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->itemsInserted <= j)
+                    break;
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
+                    continue;
             }
-            double px = p_logistic_function_full(((CalculateDJ*)param)->pairs->items[i], ((CalculateDJ*)param)->b);
-            sum += ( px - ((Observation*)((CalculateDJ*)param)->pairs->items[i])->isMatch );
-            if ( j < TF_IDF_SIZE ) {
-                sum *= ((tf_idfInfo*)((Observation*)((CalculateDJ*)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue ;
-            } else {
-                sum *= ((tf_idfInfo*)((Observation*)((CalculateDJ*)param)->pairs->items[i])->right_tf_idf->items[j-TF_IDF_SIZE])->tf_idfValue ;
+            else
+            {
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j - TF_IDF_SIZE)
+                    break;
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
+                    continue;
             }
+            double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
+            //printf("(++++++++) IN WEIGHT: %f\n", px);
+            double px_y = px - ((Observation *)((CalculateDJ *)param)->pairs->items[i])->isMatch;
+            double in_sum = 0.0;
+            if (j < TF_IDF_SIZE)
+            {
+                in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
+            }
+            else
+            {
+                in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j - TF_IDF_SIZE])->tf_idfValue;
+            }
+            sum += in_sum;
         }
-        sum = sum/((double)BATCH_SIZE);
+
+        sum = sum / ((double)BATCH_SIZE);
 
         pthread_mutex_lock(&dj_access);
         dj[j] += sum;
@@ -269,26 +426,33 @@ void calculate_dj(void *param) {
     }
 }
 
-
-double *thrd_model_training_wghts(Vector *pairs, double *b) {
-    dj = (double*)safe_calloc(TF_IDF_SIZE*2, sizeof(double));
-    for ( int i = 0; i < TF_IDF_SIZE*2 ; i++ ) {
-        dj[i] = 0;
+double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
+{
+    dj = (double *)safe_calloc(TF_IDF_SIZE * 2, sizeof(double));
+    for (int i = 0; i < TF_IDF_SIZE * 2; i++)
+    {
+        dj[i] = 0.0;
     }
     int times_inserted, count = 1;
-    if ( pairs->itemsInserted <= BATCH_SIZE ) times_inserted = 1;
-    else times_inserted = pairs->itemsInserted / BATCH_SIZE + 1;
+
+    if (pairs->itemsInserted <= BATCH_SIZE)
+        times_inserted = 1;
+    else
+        times_inserted = pairs->itemsInserted / BATCH_SIZE + 1;
     //printf("Times inserted : %d\n", times_inserted);
     // int flag = 0;
-    while ( count <= WEIGHT_TR_NUM ) {
+    while (count <= WEIGHT_TR_NUM)
+    {
         pthread_mutex_init(&dj_access, NULL);
         //printf("==> Training weights times %d ...\n", count);
-        JobScheduler *sch = scheduler_init(THREADS_NUM);
-        for ( int i = 1 ; i < times_inserted+1 ; i++ ) {
-            Job *new_job = (Job*)safe_malloc(sizeof(Job));
-            CalculateDJ *to_pass = (CalculateDJ*)safe_malloc(sizeof(CalculateDJ));
+        JobScheduler *sch = scheduler_init(threads);
+        for (int i = 1; i < times_inserted + 1; i++)
+        {
+            Job *new_job = (Job *)safe_malloc(sizeof(Job));
+            CalculateDJ *to_pass = (CalculateDJ *)safe_malloc(sizeof(CalculateDJ));
+
             new_job->function_execute = calculate_dj;
-            to_pass->place = (i-1)*BATCH_SIZE;
+            to_pass->place = (i - 1) * BATCH_SIZE;
             to_pass->pairs = pairs;
             to_pass->b = b;
             new_job->any_parameter = to_pass;
@@ -297,8 +461,10 @@ double *thrd_model_training_wghts(Vector *pairs, double *b) {
         //puts("==> Executing all jobs ...");
         scheduler_execute_all(sch);
         scheduler_wait_finish(sch);
-        for ( int i = 0 ; i < TF_IDF_SIZE*2 ; i++ ) {
-            b[i] = b[i] - LEARNING_RATE*dj[i];
+        for (int i = 0; i < TF_IDF_SIZE * 2; i++)
+        {
+            dj[i] = dj[i] / ((double)times_inserted);
+            b[i] = b[i] - LEARNING_RATE * dj[i];
         }
         //puts("==> Executed all jobs COMPLETED ...");
         count++;
@@ -310,24 +476,32 @@ double *thrd_model_training_wghts(Vector *pairs, double *b) {
             }
         }*/
         scheduler_destroy(sch);
-        pthread_mutex_destroy(&dj_access); 
+
+        pthread_mutex_destroy(&dj_access);
+
     }
     puts("==> Training model weights COMPLETED ...");
     free(dj);
     return b;
 }
 
-void print_positive_set(HashTable_w *W1) {
-    if ( W1 == NULL || W1->hashArray == NULL || W1->size == 0 ) return;
+void print_positive_set(HashTable_w *W1)
+{
+    if (W1 == NULL || W1->hashArray == NULL || W1->size == 0)
+        return;
     FILE *fptr = open_file("./output/model_positive.txt");
     puts("==> Printing Positive Matches ... ");
     for (int i = 0; i < W1->size; i++)
-    {   if ( W1->hashArray[i] == NULL ) continue;
+    {
+        if (W1->hashArray[i] == NULL)
+            continue;
         Observation *list = W1->hashArray[i]->observationsList;
-        while ( list != NULL ) {
-            if ( list->isMatch >= 0.5 ) {
-                if ( fptr != NULL )
-                fprintf(fptr, " %s, %s, %f\n", list->leftSpecId, list->rightSpecId, list->isMatch);
+        while (list != NULL)
+        {
+            if (list->isMatch >= 0.5)
+            {
+                if (fptr != NULL)
+                    fprintf(fptr, " %s, %s, %f\n", list->leftSpecId, list->rightSpecId, list->isMatch);
             }
             list = list->next;
         }
@@ -344,27 +518,32 @@ void resolve_transitivity(HashTable *hash_table, Observation *pair, HashTable_w 
 double p_logistic_function_full(Observation *pair, double *weights_array)
 {
     double f_x = 0.0;
-    for ( int i = 0 ; i < TF_IDF_SIZE ; i++ ) {
-        if ( pair->left_tf_idf->itemsInserted <= i ) break;
-        if ( pair->left_tf_idf->items[i] == NULL ) continue;
+    for (int i = 0; i < TF_IDF_SIZE; i++)
+    {
+        if (pair->left_tf_idf->itemsInserted <= i)
+            break;
+        if (pair->left_tf_idf->items[i] == NULL)
+            continue;
         double weight = weights_array[i];
-        double x_value = ((tf_idfInfo*)pair->left_tf_idf->items[i])->tf_idfValue;
-        f_x +=  weight * x_value;
+        double x_value = ((tf_idfInfo *)pair->left_tf_idf->items[i])->tf_idfValue;
+        f_x += weight * x_value;
         //printf ( "%f\n", ((tf_idfInfo*)pair->left_tf_idf->items[i])->tf_idfValue);
     }
-    for ( int i = TF_IDF_SIZE ; i < TF_IDF_SIZE*2 ; i++ ) {
-        if ( pair->right_tf_idf->itemsInserted <= i-TF_IDF_SIZE ) break;
-        if ( pair->right_tf_idf->items[i-TF_IDF_SIZE] == NULL ) continue;
+    for (int i = TF_IDF_SIZE; i < TF_IDF_SIZE * 2; i++)
+    {
+        if (pair->right_tf_idf->itemsInserted <= i - TF_IDF_SIZE)
+            break;
+        if (pair->right_tf_idf->items[i - TF_IDF_SIZE] == NULL)
+            continue;
         //printf ( "%f\n", ((tf_idfInfo*)pair->right_tf_idf->items[i-TF_IDF_SIZE])->tf_idfValue);
         double weight = weights_array[i];
-        double x_value = ((tf_idfInfo*)pair->right_tf_idf->items[i-TF_IDF_SIZE])->tf_idfValue;
-        f_x +=  weight * x_value;
+        double x_value = ((tf_idfInfo *)pair->right_tf_idf->items[i - TF_IDF_SIZE])->tf_idfValue;
+        f_x += weight * x_value;
     }
 
     double e_x = exp(-f_x);
-    double p_x = 1.0 / (1.0 + e_x);
+    double p_x = 1.0 / ((double)(1.0 + e_x));
 
-    //printf("+++ VALUE FOUND : %f\n", p_x);
     return p_x;
 }
 
@@ -408,10 +587,12 @@ Observation *get_pair_in_x_excl_set(HashTable *hash_table, HashTable_w *W1)
             count++;
         }
         test_pair = searchHashTable_w(W1, randm_spc1->specId, randm_spc2->specId);
-        if ( test_pair == NULL ) {
+        if (test_pair == NULL)
+        {
             test_pair = searchHashTable_w(W1, randm_spc2->specId, randm_spc1->specId);
         }
-        if ( count == 50000) {
+        if (count == 50000)
+        {
             printf("Error: Unable to find pairs.");
             exit(1);
         }
@@ -422,7 +603,7 @@ Observation *get_pair_in_x_excl_set(HashTable *hash_table, HashTable_w *W1)
     new_pair->left_tf_idf = randm_spc1->tfidf_vector;
     new_pair->rightSpecId = randm_spc2->specId;
     new_pair->right_tf_idf = randm_spc2->tfidf_vector;
-    new_pair->isMatch = -1;
+    new_pair->isMatch = 0.0;
     new_pair->next = NULL;
 
     return new_pair;
@@ -433,7 +614,9 @@ Observation *get_first_pair_w(HashTable_w *W1)
     if (W1 == NULL || W1->hashArray == NULL || W1->size == 0)
         return NULL;
     for (int i = 0; i < W1->size; i++)
-    {   if ( W1->hashArray[i] == NULL ) continue;
+    {
+        if (W1->hashArray[i] == NULL)
+            continue;
         if (W1->hashArray[i]->observationsList != NULL)
         {
             return W1->hashArray[i]->observationsList;
@@ -465,7 +648,9 @@ Vector *vectorize_all_pairs(HashTable *hash_table, HashTable_w *W1)
 
     int hash_buckets = W1->size;
     for (int i = 0; i < hash_buckets; i++)
-    {   if ( W1->hashArray[i] == NULL ) continue;
+    {
+        if (W1->hashArray[i] == NULL)
+            continue;
         Observation *pair_list = W1->hashArray[i]->observationsList;
         while (pair_list != NULL)
         {

@@ -5,17 +5,21 @@
 #include "../hdr/hash_Wplus.h"
 #include "../hdr/vectorImpl.h"
 
-#define LEARNING_RATE 0.2
+
+#define TEST_THREAD_NUM 10
+#define TEST_BATCH_SIZE 1000
+#define LEARNING_RATE 0.7
 #define THREADS_NUM 3
 #define BATCH_SIZE 1000
-#define NEW_PAIRS_SIZE 1000
-#define THRESHOLD_VALUE 0.3
+#define NEW_PAIRS_SIZE 10000
+#define THRESHOLD_VALUE 0.2
 #define THRESHOLD_STEP 0.1
 #define THRESHOLD_SLOPE 1
-#define WEIGHTS_START_VAL 0.5
+#define WEIGHTS_START_VAL 0.2
 #define TF_IDF_SIZE 1000
 #define E_VALUE 0.0000001
-#define WEIGHT_TR_NUM 10
+#define WEIGHT_TR_NUM 200
+
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 
@@ -29,6 +33,7 @@ typedef struct thread_args thread_args_t;
 
 typedef struct Observation Observation;
 typedef struct CalculateDJ CalculateDJ;
+typedef struct CalculateAccuracy CalculateAccuracy;
 
 struct JobScheduler
 {
@@ -61,6 +66,13 @@ struct CalculateDJ {
     int place;
 };
 
+struct CalculateAccuracy {
+    Vector *pairs;
+    double *b;
+    int place;
+    int i;
+};
+
 struct Queue
 {
     QueueNode *head;
@@ -87,27 +99,12 @@ void add(Queue *q, QueueNode *nn);
 int isempty(Queue *q);
 QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
 
-/**
- * @brief Make 3 new vectors using items in a specified vector. Percentages are 60%, 20% and 20%.
- * @param[in] all_set The vector with all the items to be separated.
- * @param[out] set1 60% of all_set.
- * @param[out] set2 20% of all_set.
- * @param[out] set3 20% of all_set.
- */
-void make_model_sets(HashTable *all_set, Vector *set1, Vector *set2, Vector *set3);
-
-/**
- * @brief Train the model using the pairs in T to calculate and return the weights.
- * @param[in] W1 The training set.
- * @param[in] T The testing set.
- * @returns The vector with the weights calculated by the training.
- */
-Vector *train_weights_testing(HashTable_w *W1, HashTable_w *T, Vector *weights);
 
 /**
  * @brief Train the model using all pairs of json files specified in datasetX_path.
+ * @param hash_table The hash_table that holds the specs.
  * @param W1 The training set.
- * @param datasetX_path The path that the json files are stored.
+ * @param full_W_pairs The training set vectorized with Observations.
  * @returns The vector with the weights calculated by the training.
  */
 double *train_weights(HashTable *hash_table, HashTable_w *W1);
@@ -176,12 +173,17 @@ void print_positive_set(HashTable_w *W1);
  * @brief Train the model given the set in Vector and with certain weights. The stochastic descend part is implemented with threads.
  * @param pairs The vector containing Observation pairs of the training set.
  * @param b The array with the weights.
+ * @param threads The number of threads used.
  * @returns The array with the new weights calculated with stochastic descend.
  */
-double *thrd_model_training_wghts(Vector *pairs, double *b);
-
+double *thrd_model_training_wghts(Vector *pairs, double *b, int threads);
 
 SpecInfo *hashtable_find_random_spec(HashTable *hash_table);
 
 Observation *get_first_pair_w(HashTable_w *W1);
+
+double model_testing(HashTable *hash_table, HashTable_w *T, double *b);
+
+double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, int threads, float threshold, int batch_size);
+
 #endif

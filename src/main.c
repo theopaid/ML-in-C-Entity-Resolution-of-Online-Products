@@ -62,17 +62,44 @@ int main(int argc, char **argv)
     //          The pairs that will be checked and added in W?+ will be pairs only in the testing set T (20% of W+).
 
     HashTable_w *W1 = getTrainingSet();
-    //HashTable_w *T = getTestSet();
-    //HashTable_w *V = getEvaluationSet();
+    HashTable_w *T = getTestSet();
+    HashTable_w *V = getEvaluationSet();
+    
     double *b = train_weights(hashTable, W1);
+    int threads = 3, batch_size = 1000;
+    float threshold = 0.3;
+    double acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
+    puts("==> (*)=======================================(*)");
+    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
+    printf("==> (|) Threads : %d\n", threads);
+    printf("==> (|) Batch size : %d\n", batch_size);
+    printf("==> (|) Threshold : %f\n", threshold);
+    puts("==> (*)=======================================(*)");
 
-    //b = train_weights_testing(W1, T, b);
+    threads = 10;
+    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
+    puts("==> (*)=======================================(*)");
+    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
+    printf("==> (|) Threads : %d\n", threads);
+    printf("==> (|) Batch size : %d\n", batch_size);
+    printf("==> (|) Threshold : %f\n", threshold);
+    puts("==> (*)========================================(*)");
+
+    threads = 28;
+    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
+    puts("==> (*)=======================================(*)");
+    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
+    printf("==> (|) Threads : %d\n", threads);
+    printf("==> (|) Batch size : %d\n", batch_size);
+    printf("==> (|) Threshold : %f\n", threshold);
+    puts("==> (*)=======================================(*)");
 
     //  5.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
 
-    //validate_model(V, b, test_values);
+    acc = model_testing(hashTable, V, b);
+    printf("==> (+) Model validation accuracy : [%f]%% \n", acc*100);
 
     freeHashTable(hashTable);
     free(b);
