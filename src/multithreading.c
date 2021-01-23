@@ -2,10 +2,10 @@
 
 double *dj;
 pthread_mutex_t dj_access;
+double *testAccuracy;
 
 static void cleanup_handler(void *arg)
 {
-
     (void)pthread_mutex_unlock(((thread_args_t *)arg)->mt);
     (void)pthread_mutex_unlock(&dj_access);
 }
@@ -42,7 +42,7 @@ void *thread_func(void *arg)
         free(qn);
     }
 
-    pthread_cleanup_pop(true);
+    pthread_cleanup_pop(false);
 }
 
 JobScheduler *scheduler_init(int no_of_threads)
@@ -169,7 +169,6 @@ QueueNode *queue_pop(Queue *q)
     return nj;
 }
 
-double *testAccuracy;
 
 void calculate_accuracy(void *param)
 {
@@ -401,6 +400,7 @@ void calculate_dj(void *param)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
+
             }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
             //printf("(++++++++) IN WEIGHT: %f\n", px);
@@ -428,6 +428,9 @@ void calculate_dj(void *param)
 
 double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 {
+
+    pthread_mutex_init(&dj_access, NULL);
+
     dj = (double *)safe_calloc(TF_IDF_SIZE * 2, sizeof(double));
     for (int i = 0; i < TF_IDF_SIZE * 2; i++)
     {
@@ -443,7 +446,9 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
     // int flag = 0;
     while (count <= WEIGHT_TR_NUM)
     {
-        pthread_mutex_init(&dj_access, NULL);
+
+        
+
         //printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
         for (int i = 1; i < times_inserted + 1; i++)
@@ -476,11 +481,11 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
             }
         }*/
         scheduler_destroy(sch);
-
-        pthread_mutex_destroy(&dj_access);
+     
 
     }
     puts("==> Training model weights COMPLETED ...");
+    pthread_mutex_destroy(&dj_access);
     free(dj);
     return b;
 }
