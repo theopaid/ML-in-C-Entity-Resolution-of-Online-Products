@@ -312,6 +312,7 @@ double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
     return accuracy;
 }
 
+
 double timeSpentTraining;
 
 double *train_weights(HashTable *hash_table, HashTable_w *W1)
@@ -327,10 +328,12 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
         puts("==> Training model weights ...");
         printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
         clock_t train_start = clock();
+
         b = thrd_model_training_wghts(full_W_pairs, b, THREADS_NUM); // !THREADS
         clock_t train_end = clock();
         timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
         printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
+
         Observation *new_pair_not_in_W;
         puts("==> Adding new pairs to training set ...");
         int pairs_count = 0;
@@ -341,7 +344,9 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
             double px = p_logistic_function_full(new_pair_not_in_W, b);
             new_pair_not_in_W->isMatch = px;
             //printf("+++ ( %f ) --- %f \n", px, 1-threshold);
+
             if ((px < threshold) || (px > 1 - threshold))
+
             {
                 //printf("+++ Value passes: %f\n", px);
                 count++;
@@ -411,11 +416,13 @@ void calculate_dj(void *param)
             }
             sum += in_sum;
         }
+
         sum = sum / ((double)BATCH_SIZE);
 
         pthread_mutex_lock(&dj_access);
         dj[j] += sum;
         pthread_mutex_unlock(&dj_access);
+        
     }
 }
 
@@ -428,6 +435,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         dj[i] = 0.0;
     }
     int times_inserted, count = 1;
+
     if (pairs->itemsInserted <= BATCH_SIZE)
         times_inserted = 1;
     else
@@ -443,6 +451,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateDJ *to_pass = (CalculateDJ *)safe_malloc(sizeof(CalculateDJ));
+
             new_job->function_execute = calculate_dj;
             to_pass->place = (i - 1) * BATCH_SIZE;
             to_pass->pairs = pairs;
