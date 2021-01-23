@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     HashTable_w *V = getEvaluationSet();
     
     double *b = train_weights(hashTable, W1);
-    int threads = 3, batch_size = 1000;
+    int threads = 10, batch_size = 1000;
     float threshold = 0.3;
     double acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
     puts("==> (*)=======================================(*)");
@@ -77,6 +77,7 @@ int main(int argc, char **argv)
     puts("==> (*)=======================================(*)");
 
     threads = 10;
+    batch_size = 1500;
     acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
     puts("==> (*)=======================================(*)");
     printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
@@ -85,7 +86,20 @@ int main(int argc, char **argv)
     printf("==> (|) Threshold : %f\n", threshold);
     puts("==> (*)========================================(*)");
 
-    threads = 28;
+    threads = 10;
+    batch_size = 500;
+    threshold = 0.3;
+    acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
+    puts("==> (*)=======================================(*)");
+    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
+    printf("==> (|) Threads : %d\n", threads);
+    printf("==> (|) Batch size : %d\n", batch_size);
+    printf("==> (|) Threshold : %f\n", threshold);
+    puts("==> (*)=======================================(*)");
+
+    threads = 10;
+    batch_size = 1000;
+    threshold = 0.2;
     acc = model_testing_testing(hashTable, T, b, threads, threshold, batch_size);
     puts("==> (*)=======================================(*)");
     printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);

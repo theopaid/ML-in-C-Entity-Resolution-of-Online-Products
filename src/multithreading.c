@@ -82,7 +82,7 @@ void scheduler_destroy(JobScheduler *sch)
 {
     for (int i = 0; i < sch->threads; i++)
     {
-        ec_nzero(pthread_cancel(sch->tids[i]), "failed pthread cancel");
+        //ec_nzero(pthread_cancel(sch->tids[i]), "failed pthread cancel");
         ec_nzero(pthread_join(sch->tids[i], NULL), "failed pthread join");
     }
     ec_nzero(pthread_barrier_destroy(&sch->barrier), "failed barrier destroy");
@@ -215,14 +215,14 @@ double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, i
     else
         test_acc_arr_size = _threads;
     testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
-
+    for (int i = 0; i < test_acc_arr_size; i++)
+    {
+        testAccuracy[i] = 0.0;
+    }
     while (threshold < 0.5)
     {
         //puts("==> Calculating accuracy ... ");
-        for (int i = 0; i < test_acc_arr_size; i++)
-        {
-            testAccuracy[i] = 0.0;
-        }
+
         JobScheduler *sch = scheduler_init(_threads);
         for (int i = 1; i < times_inserted + 1; i++)
         {
@@ -240,15 +240,15 @@ double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, i
         scheduler_wait_finish(sch);
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
 
-        for (int i = 0; i < test_acc_arr_size; i++)
-        {
-            accuracy += testAccuracy[i];
-        }
-        accuracy = accuracy / ((double)test_acc_arr_size);
         scheduler_destroy(sch);
 
     }
-
+    for (int i = 0; i < test_acc_arr_size; i++)
+    {
+        accuracy += testAccuracy[i];
+    }
+    freeVectorWithoutItems(full_T_pairs);
+    accuracy = accuracy / ((double)test_acc_arr_size);
     puts("==> Model testing COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
@@ -311,7 +311,7 @@ double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
         scheduler_destroy(sch);
 
     }
-
+    freeVectorWithoutItems(full_T_pairs);
     puts("==> Model validation COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
@@ -376,7 +376,7 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1)
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
     }
-
+    freeVectorWithoutItems(full_W_pairs);
     puts("==> Model training COMPLETED ...");
     print_positive_set(W1);
 
@@ -400,14 +400,14 @@ void calculate_dj(void *param)
             }
             if (j < TF_IDF_SIZE)
             {
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->itemsInserted <= j+1)
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->itemsInserted <= j)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
                     continue;
             }
             else
             {
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j - TF_IDF_SIZE +1)
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j - TF_IDF_SIZE)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
