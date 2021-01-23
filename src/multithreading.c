@@ -171,7 +171,6 @@ QueueNode *queue_pop(Queue *q)
     return nj;
 }
 
-
 void calculate_accuracy(void *param)
 {
     int items_start = ((CalculateAccuracy *)param)->place;
@@ -396,7 +395,6 @@ void calculate_dj(void *param)
         double sum = 0.0;
         for (int i = items_start; i < items_end; i++)
         {
-
             if ( (Observation *)((CalculateDJ *)param)->pairs->items == NULL || ((Observation *)((CalculateDJ *)param)->pairs->items[i]) == NULL ) {
                 break;
             }
@@ -413,20 +411,20 @@ void calculate_dj(void *param)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
-            }
 
+            }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
             //printf("(++++++++) IN WEIGHT: %f\n", px);
             double px_y = px - ((Observation *)((CalculateDJ *)param)->pairs->items[i])->isMatch;
             double in_sum = 0.0;
             if (j < TF_IDF_SIZE)
             {
-
                 if ( ((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
                     break;
                 else
                     in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
             }
+
             else
             {
                 if ( ((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
@@ -447,6 +445,7 @@ void calculate_dj(void *param)
 
 double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 {
+
 
     pthread_mutex_init(&dj_access, NULL);
 
@@ -469,7 +468,8 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 
         printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
-        for (int i = 1; i < times_inserted ; i++)
+
+        for (int i = 1; i < times_inserted+1 ; i++)
 
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
@@ -482,13 +482,13 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
         }
-        //puts("==> Executing all jobs ...");
+        puts("==> Executing all jobs ...");
         scheduler_execute_all(sch);
-        //puts("==> Waiting to finish ...");
-        scheduler_wait_finish(sch);
 
-        //puts("==> Calculating final dJ ...");
-        scheduler_destroy(sch);
+        puts("==> Waiting to finish ...");
+        scheduler_wait_finish(sch);
+        puts("==> Calculating final dJ ...");
+
 
         for (int i = 0; i < TF_IDF_SIZE * 2; i++)
         {
@@ -504,6 +504,9 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
                 break;
             }
         }*/
+
+        scheduler_destroy(sch);
+
     }
     puts("==> Training model weights COMPLETED ...");
     pthread_mutex_destroy(&dj_access);
