@@ -41,6 +41,7 @@ void *thread_func(void *arg)
         free(qn);
     }
 
+
     pthread_cleanup_pop(true);
     return NULL;
 }
@@ -238,12 +239,14 @@ double model_testing_testing(HashTable *hash_table, HashTable_w *T, double *b, i
         scheduler_execute_all(sch);
         scheduler_wait_finish(sch);
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
+
         for (int i = 0; i < test_acc_arr_size; i++)
         {
             accuracy += testAccuracy[i];
         }
         accuracy = accuracy / ((double)test_acc_arr_size);
         scheduler_destroy(sch);
+
     }
 
     puts("==> Model testing COMPLETED ...");
@@ -277,6 +280,7 @@ double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
     while (threshold < 0.5)
     {
         //puts("==> Calculating accuracy ... ");
+
         for (int i = 0; i < test_acc_arr_size; i++)
         {
             testAccuracy[i] = 0.0;
@@ -297,12 +301,15 @@ double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
         scheduler_execute_all(sch);
         scheduler_wait_finish(sch);
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
+
         for (int i = 0; i < test_acc_arr_size; i++)
         {
             accuracy += testAccuracy[i];
         }
         accuracy = accuracy / ((double)test_acc_arr_size);
+
         scheduler_destroy(sch);
+
     }
 
     puts("==> Model validation COMPLETED ...");
@@ -311,6 +318,7 @@ double model_testing(HashTable *hash_table, HashTable_w *T, double *b)
     printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
     return accuracy;
 }
+
 
 double timeSpentTraining;
 
@@ -403,6 +411,7 @@ void calculate_dj(void *param)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
+
             }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
             //printf("(++++++++) IN WEIGHT: %f\n", px);
@@ -415,6 +424,7 @@ void calculate_dj(void *param)
                 else
                     in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
             }
+
             else
             {
                 if ( ((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
@@ -424,6 +434,7 @@ void calculate_dj(void *param)
             }
             sum += in_sum;
         }
+
         sum = sum / ((double)BATCH_SIZE);
 
         pthread_mutex_lock(&dj_access);
@@ -434,7 +445,10 @@ void calculate_dj(void *param)
 
 double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 {
+
+
     pthread_mutex_init(&dj_access, NULL);
+
     dj = (double *)safe_calloc(TF_IDF_SIZE * 2, sizeof(double));
     for (int i = 0; i < TF_IDF_SIZE * 2; i++)
     {
@@ -447,13 +461,16 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
     else
         times_inserted = pairs->itemsInserted / BATCH_SIZE + 1;
     //printf("Times inserted : %d\n", times_inserted);
+
     //int flag = 0;
     while (count <= WEIGHT_TR_NUM)
     {
 
         printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
+
         for (int i = 1; i < times_inserted+1 ; i++)
+
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateDJ *to_pass = (CalculateDJ *)safe_malloc(sizeof(CalculateDJ));
@@ -467,9 +484,11 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         }
         puts("==> Executing all jobs ...");
         scheduler_execute_all(sch);
+
         puts("==> Waiting to finish ...");
         scheduler_wait_finish(sch);
         puts("==> Calculating final dJ ...");
+
 
         for (int i = 0; i < TF_IDF_SIZE * 2; i++)
         {
@@ -485,7 +504,9 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
                 break;
             }
         }*/
+
         scheduler_destroy(sch);
+
     }
     puts("==> Training model weights COMPLETED ...");
     pthread_mutex_destroy(&dj_access);
