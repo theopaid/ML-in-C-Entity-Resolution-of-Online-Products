@@ -273,11 +273,14 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     //clock_t testing_end = clock();
     //timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
     //printf("==> [+++] Testing Time [ %f ]\n", timeSpentTesting);
+    pthread_mutex_destroy(&acc_access);
+
     return accuracy;
 }
 
 double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 {
+    pthread_mutex_init(&acc_access, NULL);
     puts("==> Initiating model VALIDATION ...");
     //clock_t validation_start = clock();
     double accuracy = 0.0;
@@ -438,12 +441,16 @@ void calculate_dj(void *param)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j] == NULL)
                     continue;
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
+                    continue;
             }
             else
             {
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j - TF_IDF_SIZE)
                     break;
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j] == NULL)
+                    continue;
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
                     continue;
             }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
