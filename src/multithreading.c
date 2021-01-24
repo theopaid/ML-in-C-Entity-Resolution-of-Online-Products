@@ -86,14 +86,15 @@ void scheduler_destroy(JobScheduler *sch)
         //ec_nzero(pthread_cancel(sch->tids[i]), "failed pthread cancel");
         ec_nzero(pthread_join(sch->tids[i], NULL), "failed pthread join");
     }
+
+    free(sch->thread_args);
+    free(sch->tids);
+    destroy_queue(sch->q);
     ec_nzero(pthread_barrier_destroy(&sch->barrier), "failed barrier destroy");
     ec_nzero(pthread_mutex_destroy(&sch->mt), "failed mutex destroy");
     ec_nzero(pthread_mutex_destroy(&sch->mtcv), "failed mutex destroy");
     ec_nzero(pthread_cond_destroy(&sch->cv), "failed cond destroy");
 
-    free(sch->thread_args);
-    free(sch->tids);
-    destroy_queue(sch->q);
     free(sch);
 }
 
@@ -195,7 +196,9 @@ void calculate_accuracy(void *param)
         else
             no_hits++;
     }
-    testAccuracy[((CalculateAccuracy *)param)->i] = (hits) / ((double)hits + no_hits);
+    int position = ((CalculateAccuracy *)param)->i;
+    if ( testAccuracy[position] > 0.0) testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits+no_hits))/2.0;
+    else testAccuracy[position] = (hits) / ((double)hits + no_hits);
 }
 
 double timeSpentTesting;
@@ -229,14 +232,15 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
-        for (int i = 1; i < times_inserted + 1; i++)
+        for (int i = 1; i < times_inserted+1 ; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_T_pairs;
             to_pass->b = b;
-            to_pass->i = i - 1;
+            if ( _threads >= times_inserted ) to_pass->i = i - 1;
+            else to_pass->i = (i-1)%_threads;
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -296,14 +300,15 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         }
 
         JobScheduler *sch = scheduler_init(TEST_THREAD_NUM);
-        for (int i = 1; i < times_inserted + 1; i++)
+        for (int i = 1; i < times_inserted+1 ; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_V_pairs;
             to_pass->b = b;
-            to_pass->i = i - 1;
+            if ( TEST_THREAD_NUM >= times_inserted ) to_pass->i = i - 1;
+            else to_pass->i = (i-1)%TEST_THREAD_NUM;
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -370,15 +375,15 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
                 //printf("+++ Value passes: %f\n", px);
                 count++;
                 vectorPushBack(full_W_pairs, new_pair_not_in_W);
-                Observation *new_pair = (Observation *)safe_malloc(sizeof(Observation));
-                new_pair->leftSpecId = new_pair_not_in_W->leftSpecId;
+                //Observation *new_pair = (Observation *)safe_malloc(sizeof(Observation));
+                /*new_pair->leftSpecId = new_pair_not_in_W->leftSpecId;
                 new_pair->rightSpecId = new_pair_not_in_W->rightSpecId;
                 new_pair->isMatch = new_pair_not_in_W->isMatch;
                 new_pair->next = NULL;
                 new_pair->left_tf_idf = new_pair_not_in_W->left_tf_idf;
                 new_pair->right_tf_idf = new_pair_not_in_W->right_tf_idf;
                 //printf("==> Adding new pair: ( %f, %s, %s )\n", new_pair->isMatch, new_pair->leftSpecId, new_pair->rightSpecId);
-                addToHashTable_w(W1, new_pair);
+                addToHashTable_w(W1, new_pair);*/
             }
             //free(new_pair_not_in_W);
             pairs_count++;
