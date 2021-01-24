@@ -196,9 +196,11 @@ void calculate_accuracy(void *param)
         else
             no_hits++;
     }
+
     int position = ((CalculateAccuracy *)param)->i;
     if ( testAccuracy[position] > 0.0) testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits+no_hits))/2.0;
     else testAccuracy[position] = (hits) / ((double)hits + no_hits);
+
 }
 
 double timeSpentTesting;
@@ -232,7 +234,9 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
+
         for (int i = 1; i < times_inserted+1 ; i++)
+
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
@@ -241,6 +245,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
             to_pass->b = b;
             if ( _threads >= times_inserted ) to_pass->i = i - 1;
             else to_pass->i = (i-1)%_threads;
+
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -307,8 +312,10 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_V_pairs;
             to_pass->b = b;
+
             if ( TEST_THREAD_NUM >= times_inserted ) to_pass->i = i - 1;
             else to_pass->i = (i-1)%TEST_THREAD_NUM;
+
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -483,8 +490,10 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         {
             dj[i] = 0.0;
         }
+
         if (count % 50 == 0)
             printf("==> Training weights times %d ...\n", count);
+
         JobScheduler *sch = scheduler_init(threads);
 
         for (int i = 1; i < times_inserted + 1; i++)
