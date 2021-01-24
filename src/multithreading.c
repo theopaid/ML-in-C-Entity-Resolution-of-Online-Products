@@ -253,6 +253,8 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     }
 
     puts("==> Model testing COMPLETED ...");
+    free(testAccuracy);
+    testAccuracy = NULL;
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
     printf("==> [+++] Testing Time [ %f ]\n", timeSpentTesting);
@@ -262,7 +264,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
 double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 {
     puts("==> Initiating model VALIDATION ...");
-    clock_t testing_start = clock();
+    clock_t validation_start = clock();
     double accuracy = 0.0;
     float threshold = THRESHOLD_VALUE;
 
@@ -319,8 +321,10 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 
 
     puts("==> Model validation COMPLETED ...");
-    clock_t testing_end = clock();
-    timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
+    clock_t validation_end = clock();
+    free(testAccuracy);
+    testAccuracy = NULL;
+    timeSpentTesting = (double)(validation_end - validation_start) / CLOCKS_PER_SEC;
     printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
     return accuracy;
 }
@@ -329,6 +333,7 @@ double timeSpentTraining;
 
 double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pairs)
 {
+    clock_t train_start = clock();
     puts("==> Initiating model TRAINING ...");
     double *b = weight_array_init(TF_IDF_SIZE * 2); // init array based on tf-idfs size
     //printf("Total pairs in: %ld, Total pairs vectorized: %d\n", W1->itemsInserted, full_W_pairs->itemsInserted);
@@ -338,12 +343,8 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
     {
         puts("==> Training model weights ...");
         printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
-        clock_t train_start = clock();
 
         b = thrd_model_training_wghts(full_W_pairs, b, THREADS_NUM); // !THREADS
-        clock_t train_end = clock();
-        timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
-        printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
 
         Observation *new_pair_not_in_W;
         puts("==> Adding new pairs to training set ...");
@@ -380,7 +381,9 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
     }
-
+    clock_t train_end = clock();
+    timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
+    printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
     puts("==> Model training COMPLETED ...");
     print_positive_set(W1);
 

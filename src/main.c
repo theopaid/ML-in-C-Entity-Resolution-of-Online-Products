@@ -85,10 +85,10 @@ int main(int argc, char **argv)
     //  5.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
-
+    freeVectorWithoutItems(full_T_pairs);
     acc = model_testing(hashTable, full_V_pairs, b);
     printf("==> (+) Model validation accuracy : [%f]%% \n", acc*100);
-
+freeVectorWithoutItems(full_V_pairs);
     freeHashTable(hashTable);
     free(b);
     clock_t end = clock();
