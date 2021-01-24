@@ -185,7 +185,8 @@ void calculate_accuracy(void *param)
     double no_hits = 0.0;
     for (int i = items_start; i < items_end; i++)
     {
-        if ( ((CalculateAccuracy *)param)->pairs->items[i] == NULL ) continue;
+        if (((CalculateAccuracy *)param)->pairs->items[i] == NULL)
+            continue;
         double px = p_logistic_function_full(((CalculateAccuracy *)param)->pairs->items[i], ((CalculateAccuracy *)param)->b);
         double y = ((Observation *)((CalculateAccuracy *)param)->pairs->items[i])->isMatch;
         //printf("==> (+++) ( %f, %f )\n", px, y);
@@ -202,7 +203,7 @@ double timeSpentTesting;
 double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double *b, int _threads, float _threshold, int _batch_size)
 {
     puts("==> Initiating model TESTING ...");
-    clock_t testing_start = clock();
+    //clock_t testing_start = clock();
     double accuracy = 0.0;
     float threshold = _threshold;
 
@@ -217,7 +218,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         test_acc_arr_size = times_inserted;
     else
         test_acc_arr_size = _threads;
-    testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
+    testAccuracy = (double *)calloc(test_acc_arr_size, sizeof(double));
 
     while (threshold < 0.5)
     {
@@ -228,14 +229,14 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
-        for (int i = 1; i < times_inserted ; i++)
+        for (int i = 1; i < times_inserted; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_T_pairs;
             to_pass->b = b;
-            to_pass->i = i-1;
+            to_pass->i = i - 1;
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -256,16 +257,16 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     puts("==> Model testing COMPLETED ...");
     free(testAccuracy);
     testAccuracy = NULL;
-    clock_t testing_end = clock();
-    timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
-    printf("==> [+++] Testing Time [ %f ]\n", timeSpentTesting);
+    //clock_t testing_end = clock();
+    //timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
+    //printf("==> [+++] Testing Time [ %f ]\n", timeSpentTesting);
     return accuracy;
 }
 
 double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 {
     puts("==> Initiating model VALIDATION ...");
-    clock_t validation_start = clock();
+    //clock_t validation_start = clock();
     double accuracy = 0.0;
     float threshold = THRESHOLD_VALUE;
 
@@ -280,7 +281,7 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         test_acc_arr_size = times_inserted;
     else
         test_acc_arr_size = TEST_THREAD_NUM;
-    testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
+    testAccuracy = (double *)calloc(test_acc_arr_size, sizeof(double));
     for (int i = 0; i < test_acc_arr_size; i++)
     {
         testAccuracy[i] = 0.0;
@@ -320,13 +321,12 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         accuracy = accuracy / ((double)test_acc_arr_size);
     }
 
-
     puts("==> Model validation COMPLETED ...");
-    clock_t validation_end = clock();
+    //clock_t validation_end = clock();
     free(testAccuracy);
     testAccuracy = NULL;
-    timeSpentTesting = (double)(validation_end - validation_start) / CLOCKS_PER_SEC;
-    printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
+    //timeSpentTesting = (double)(validation_end - validation_start) / CLOCKS_PER_SEC;
+    //printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
     return accuracy;
 }
 
@@ -334,17 +334,23 @@ double timeSpentTraining;
 
 double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pairs)
 {
-    clock_t train_start = clock();
+    //clock_t train_start = clock();
     puts("==> Initiating model TRAINING ...");
     double *b = weight_array_init(TF_IDF_SIZE * 2); // init array based on tf-idfs size
     //printf("Total pairs in: %ld, Total pairs vectorized: %d\n", W1->itemsInserted, full_W_pairs->itemsInserted);
     float threshold = THRESHOLD_VALUE;
+    dj = (double *)calloc(TF_IDF_SIZE * 2, sizeof(double));
+    pthread_mutex_init(&dj_access, NULL);
 
     while (threshold < 0.5)
     {
         puts("==> Training model weights ...");
         printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
 
+        for (int i = 0; i < TF_IDF_SIZE * 2; i++)
+        {
+            dj[i] = 0.0;
+        }
         b = thrd_model_training_wghts(full_W_pairs, b, THREADS_NUM); // !THREADS
 
         Observation *new_pair_not_in_W;
@@ -382,12 +388,13 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
     }
-    clock_t train_end = clock();
-    timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
-    printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
+    free(dj);
+    pthread_mutex_destroy(&dj_access);
+    //clock_t train_end = clock();
+    //timeSpentTraining = (double)(train_end - train_start) / CLOCKS_PER_SEC;
+    //printf("==> [+++] Training Time [ %f ]\n", timeSpentTraining);
     puts("==> Model training COMPLETED ...");
     print_positive_set(W1);
-
     return b;
 }
 
@@ -432,7 +439,6 @@ void calculate_dj(void *param)
                 //   break;
                 //else
                 in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
-
             }
 
             else
@@ -442,7 +448,6 @@ void calculate_dj(void *param)
                 //  break;
                 // else
                 in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j - TF_IDF_SIZE])->tf_idfValue;
-
             }
             sum += in_sum;
         }
@@ -458,13 +463,6 @@ void calculate_dj(void *param)
 double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 {
 
-    pthread_mutex_init(&dj_access, NULL);
-
-    dj = (double *)safe_calloc(TF_IDF_SIZE * 2, sizeof(double));
-    for (int i = 0; i < TF_IDF_SIZE * 2; i++)
-    {
-        dj[i] = 0.0;
-    }
     int times_inserted, count = 1;
 
     if (pairs->itemsInserted <= BATCH_SIZE)
@@ -476,8 +474,11 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
     //int flag = 0;
     while (count <= WEIGHT_TR_NUM)
     {
-
-        //printf("==> Training weights times %d ...\n", count);
+        for (int i = 0; i < TF_IDF_SIZE * 2; i++)
+        {
+            dj[i] = 0.0;
+        }
+        printf("==> Training weights times %d ...\n", count);
         JobScheduler *sch = scheduler_init(threads);
 
         for (int i = 1; i < times_inserted + 1; i++)
@@ -518,8 +519,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         scheduler_destroy(sch);
     }
     puts("==> Training model weights COMPLETED ...");
-    pthread_mutex_destroy(&dj_access);
-    free(dj);
+
     return b;
 }
 
