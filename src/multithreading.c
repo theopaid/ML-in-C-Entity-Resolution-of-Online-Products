@@ -198,9 +198,10 @@ void calculate_accuracy(void *param)
     }
 
     int position = ((CalculateAccuracy *)param)->i;
-    if ( testAccuracy[position] > 0.0) testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits+no_hits))/2.0;
-    else testAccuracy[position] = (hits) / ((double)hits + no_hits);
-
+    if (testAccuracy[position] > 0.0)
+        testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits + no_hits)) / 2.0;
+    else
+        testAccuracy[position] = (hits) / ((double)hits + no_hits);
 }
 
 double timeSpentTesting;
@@ -235,7 +236,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
 
         JobScheduler *sch = scheduler_init(_threads);
 
-        for (int i = 1; i < times_inserted+1 ; i++)
+        for (int i = 1; i < times_inserted + 1; i++)
 
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
@@ -243,8 +244,10 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_T_pairs;
             to_pass->b = b;
-            if ( _threads >= times_inserted ) to_pass->i = i - 1;
-            else to_pass->i = (i-1)%_threads;
+            if (_threads >= times_inserted)
+                to_pass->i = i - 1;
+            else
+                to_pass->i = (i - 1) % _threads;
 
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
@@ -305,7 +308,7 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         }
 
         JobScheduler *sch = scheduler_init(TEST_THREAD_NUM);
-        for (int i = 1; i < times_inserted+1 ; i++)
+        for (int i = 1; i < times_inserted + 1; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
@@ -313,8 +316,10 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
             to_pass->pairs = full_V_pairs;
             to_pass->b = b;
 
-            if ( TEST_THREAD_NUM >= times_inserted ) to_pass->i = i - 1;
-            else to_pass->i = (i-1)%TEST_THREAD_NUM;
+            if (TEST_THREAD_NUM >= times_inserted)
+                to_pass->i = i - 1;
+            else
+                to_pass->i = (i - 1) % TEST_THREAD_NUM;
 
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
@@ -382,15 +387,15 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
                 //printf("+++ Value passes: %f\n", px);
                 count++;
                 vectorPushBack(full_W_pairs, new_pair_not_in_W);
-                //Observation *new_pair = (Observation *)safe_malloc(sizeof(Observation));
-                /*new_pair->leftSpecId = new_pair_not_in_W->leftSpecId;
+                Observation *new_pair = (Observation *)safe_malloc(sizeof(Observation));
+                new_pair->leftSpecId = new_pair_not_in_W->leftSpecId;
                 new_pair->rightSpecId = new_pair_not_in_W->rightSpecId;
                 new_pair->isMatch = new_pair_not_in_W->isMatch;
                 new_pair->next = NULL;
                 new_pair->left_tf_idf = new_pair_not_in_W->left_tf_idf;
                 new_pair->right_tf_idf = new_pair_not_in_W->right_tf_idf;
                 //printf("==> Adding new pair: ( %f, %s, %s )\n", new_pair->isMatch, new_pair->leftSpecId, new_pair->rightSpecId);
-                addToHashTable_w(W1, new_pair);*/
+                addToHashTable_w(W1, new_pair);
             }
             //free(new_pair_not_in_W);
             pairs_count++;
@@ -430,14 +435,14 @@ void calculate_dj(void *param)
             {
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->itemsInserted <= j)
                     break;
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j] == NULL)
                     continue;
             }
             else
             {
                 if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->itemsInserted <= j - TF_IDF_SIZE)
                     break;
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
+                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j] == NULL)
                     continue;
             }
             double px = p_logistic_function_full(((CalculateDJ *)param)->pairs->items[i], ((CalculateDJ *)param)->b);
@@ -496,7 +501,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 
         JobScheduler *sch = scheduler_init(threads);
 
-        for (int i = 1; i < times_inserted + 1; i++)
+        for (int i = 1; i < times_inserted+1; i++)
 
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
