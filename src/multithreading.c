@@ -42,7 +42,7 @@ void *thread_func(void *arg)
         free(qn);
     }
 
-    pthread_cleanup_pop(true);
+    pthread_cleanup_pop(false);
     return NULL;
 }
 
@@ -185,6 +185,7 @@ void calculate_accuracy(void *param)
     double no_hits = 0.0;
     for (int i = items_start; i < items_end; i++)
     {
+        if ( ((CalculateAccuracy *)param)->pairs->items[i] == NULL ) continue;
         double px = p_logistic_function_full(((CalculateAccuracy *)param)->pairs->items[i], ((CalculateAccuracy *)param)->b);
         double y = ((Observation *)((CalculateAccuracy *)param)->pairs->items[i])->isMatch;
         //printf("==> (+++) ( %f, %f )\n", px, y);
@@ -193,7 +194,7 @@ void calculate_accuracy(void *param)
         else
             no_hits++;
     }
-    testAccuracy[((CalculateAccuracy *)param)->i] = (hits) / ((double)TEST_BATCH_SIZE);
+    testAccuracy[((CalculateAccuracy *)param)->i] = (hits) / ((double)hits + no_hits);
 }
 
 double timeSpentTesting;
@@ -227,14 +228,14 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
-        for (int i = 1; i < times_inserted + 1; i++)
+        for (int i = 1; i < times_inserted ; i++)
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_T_pairs;
             to_pass->b = b;
-            to_pass->i = i;
+            to_pass->i = i-1;
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -244,7 +245,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
 
         scheduler_destroy(sch);
-
+        accuracy = 0;
         for (int i = 0; i < test_acc_arr_size; i++)
         {
             accuracy += testAccuracy[i];
@@ -301,7 +302,7 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
             new_job->function_execute = calculate_accuracy;
             to_pass->pairs = full_V_pairs;
             to_pass->b = b;
-            to_pass->i = i;
+            to_pass->i = i - 1;
             to_pass->place = (i - 1) * TEST_BATCH_SIZE;
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
@@ -311,7 +312,7 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
 
         scheduler_destroy(sch);
-
+        accuracy = 0;
         for (int i = 0; i < test_acc_arr_size; i++)
         {
             accuracy += testAccuracy[i];

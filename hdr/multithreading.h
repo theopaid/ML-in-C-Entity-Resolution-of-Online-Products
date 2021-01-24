@@ -6,10 +6,10 @@
 #include "../hdr/vectorImpl.h"
 
 
-#define TEST_THREAD_NUM 10
+#define TEST_THREAD_NUM 22
 #define TEST_BATCH_SIZE 1000
 #define LEARNING_RATE 0.7
-#define THREADS_NUM 10
+#define THREADS_NUM 22
 #define BATCH_SIZE 1000
 #define NEW_PAIRS_SIZE 10000
 #define THRESHOLD_VALUE 0.2
