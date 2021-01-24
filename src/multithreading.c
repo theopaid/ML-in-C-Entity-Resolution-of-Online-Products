@@ -185,8 +185,6 @@ void calculate_accuracy(void *param)
     double no_hits = 0.0;
     for (int i = items_start; i < items_end; i++)
     {
-        if (((CalculateAccuracy *)param)->pairs->items[i] == NULL)
-            continue;
         double px = p_logistic_function_full(((CalculateAccuracy *)param)->pairs->items[i], ((CalculateAccuracy *)param)->b);
         double y = ((Observation *)((CalculateAccuracy *)param)->pairs->items[i])->isMatch;
         //printf("==> (+++) ( %f, %f )\n", px, y);
@@ -219,12 +217,13 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     else
         test_acc_arr_size = _threads;
     testAccuracy = (double *)safe_calloc(test_acc_arr_size, sizeof(double));
-    for (int i = 0; i < test_acc_arr_size; i++)
-    {
-        testAccuracy[i] = 0.0;
-    }
+
     while (threshold < 0.5)
     {
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            testAccuracy[i] = 0.0;
+        }
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
@@ -245,13 +244,14 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
 
         scheduler_destroy(sch);
-    }
-    for (int i = 0; i < test_acc_arr_size; i++)
-    {
-        accuracy += testAccuracy[i];
+
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            accuracy += testAccuracy[i];
+        }
+        accuracy = accuracy / ((double)test_acc_arr_size);
     }
 
-    accuracy = accuracy / ((double)test_acc_arr_size);
     puts("==> Model testing COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
@@ -286,6 +286,11 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
     {
         //puts("==> Calculating accuracy ... ");
 
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            testAccuracy[i] = 0.0;
+        }
+
         JobScheduler *sch = scheduler_init(TEST_THREAD_NUM);
         for (int i = 1; i < times_inserted + 1; i++)
         {
@@ -304,13 +309,14 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
 
         scheduler_destroy(sch);
+
+        for (int i = 0; i < test_acc_arr_size; i++)
+        {
+            accuracy += testAccuracy[i];
+        }
+        accuracy = accuracy / ((double)test_acc_arr_size);
     }
 
-    for (int i = 0; i < test_acc_arr_size; i++)
-    {
-        accuracy += testAccuracy[i];
-    }
-    accuracy = accuracy / ((double)test_acc_arr_size);
 
     puts("==> Model validation COMPLETED ...");
     clock_t testing_end = clock();
@@ -417,18 +423,22 @@ void calculate_dj(void *param)
             double in_sum = 0.0;
             if (j < TF_IDF_SIZE)
             {
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
-                    break;
-                else
-                    in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
+
+                // if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[i] == NULL)
+                //   break;
+                //else
+                in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->left_tf_idf->items[j])->tf_idfValue;
+
             }
 
             else
             {
-                if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
-                    break;
-                else
-                    in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j - TF_IDF_SIZE])->tf_idfValue;
+
+                ///if (((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[i] == NULL)
+                //  break;
+                // else
+                in_sum = px_y * ((tf_idfInfo *)((Observation *)((CalculateDJ *)param)->pairs->items[i])->right_tf_idf->items[j - TF_IDF_SIZE])->tf_idfValue;
+
             }
             sum += in_sum;
         }
