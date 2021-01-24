@@ -250,16 +250,6 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         }
         accuracy = accuracy / ((double)test_acc_arr_size);
     }
-<<<<<<< HEAD
-
-=======
-    for (int i = 0; i < test_acc_arr_size; i++)
-    {
-        accuracy += testAccuracy[i];
-    }
-
-    accuracy = accuracy / ((double)test_acc_arr_size);
->>>>>>> 0e5a24232317142d2805ed83bbf46970b6af1f0c
     puts("==> Model testing COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
@@ -319,15 +309,6 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
         accuracy = accuracy / ((double)test_acc_arr_size);
     }
 
-<<<<<<< HEAD
-=======
-    for (int i = 0; i < test_acc_arr_size; i++)
-    {
-        accuracy += testAccuracy[i];
-    }
-    accuracy = accuracy / ((double)test_acc_arr_size);
-
->>>>>>> 0e5a24232317142d2805ed83bbf46970b6af1f0c
     puts("==> Model validation COMPLETED ...");
     clock_t testing_end = clock();
     timeSpentTesting = (double)(testing_end - testing_start) / CLOCKS_PER_SEC;
