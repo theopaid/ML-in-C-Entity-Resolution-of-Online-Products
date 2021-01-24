@@ -3,6 +3,7 @@
 double *dj;
 pthread_mutex_t dj_access;
 double *testAccuracy;
+pthread_mutex_t acc_access;
 
 static void cleanup_handler(void *arg)
 {
@@ -198,16 +199,20 @@ void calculate_accuracy(void *param)
     }
 
     int position = ((CalculateAccuracy *)param)->i;
-    if (testAccuracy[position] > 0.0)
-        testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits + no_hits)) / 2.0;
-    else
-        testAccuracy[position] = (hits) / ((double)hits + no_hits);
+
+    pthread_mutex_lock(&acc_access);
+    if ( testAccuracy[position] > 0.0) testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits+no_hits))/2.0;
+    else testAccuracy[position] = (hits) / ((double)hits + no_hits);
+    pthread_mutex_unlock(&acc_access);
+
+
 }
 
 double timeSpentTesting;
 
 double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double *b, int _threads, float _threshold, int _batch_size)
 {
+    pthread_mutex_init(&acc_access, NULL);
     puts("==> Initiating model TESTING ...");
     //clock_t testing_start = clock();
     double accuracy = 0.0;
@@ -344,6 +349,7 @@ double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
     testAccuracy = NULL;
     //timeSpentTesting = (double)(validation_end - validation_start) / CLOCKS_PER_SEC;
     //printf("==> [+++] Validation Time [ %f ]\n", timeSpentTesting);
+    pthread_mutex_destroy(&acc_access);
     return accuracy;
 }
 
@@ -358,8 +364,8 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
     float threshold = THRESHOLD_VALUE;
     dj = (double *)calloc(TF_IDF_SIZE * 2, sizeof(double));
     pthread_mutex_init(&dj_access, NULL);
-
-    while (threshold < 0.5)
+    int finish = 0;
+    while (threshold < 0.5 && finish < 3)
     {
         puts("==> Training model weights ...");
         printf("==> Threads that are being used: %d ...\n", THREADS_NUM);
@@ -404,6 +410,7 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
         puts("==> Resolving transitivity issues between pairs ...");
         resolve_transitivity(hash_table, new_pair_not_in_W, W1); //
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
+        finish++;
     }
     free(dj);
     pthread_mutex_destroy(&dj_access);
