@@ -21,6 +21,7 @@
 #define WEIGHT_TR_NUM 300
 
 
+
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
 
 void *thread_func(void *arg);

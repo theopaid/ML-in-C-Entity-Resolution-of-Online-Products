@@ -229,7 +229,9 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
+
         for (int i = 1; i < times_inserted+1; i++)
+
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
