@@ -5,23 +5,28 @@
 #include "../hdr/hash_Wplus.h"
 #include "../hdr/vectorImpl.h"
 
-
 #define TEST_THREAD_NUM 10
 #define TEST_BATCH_SIZE 1000
 #define LEARNING_RATE 0.7
-#define THREADS_NUM 20
+#define THREADS_NUM 15
 #define BATCH_SIZE 1000
 #define NEW_PAIRS_SIZE 10000
-#define THRESHOLD_VALUE 0.3
-#define THRESHOLD_STEP 0.1
+#define THRESHOLD_VALUE 0.1
+#define THRESHOLD_STEP 0.15
 #define THRESHOLD_SLOPE 1
 #define WEIGHTS_START_VAL 0.2
 #define TF_IDF_SIZE 1000
 #define E_VALUE 0.0000001
-#define WEIGHT_TR_NUM 300
+#define WEIGHT_TR_NUM 400
 
-
-#define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}
+#define ec_nzero(call, msg) \
+    {                       \
+        if ((call) < 0)     \
+        {                   \
+            perror(msg);    \
+            exit(1);        \
+        }                   \
+    }
 
 void *thread_func(void *arg);
 
@@ -62,13 +67,15 @@ struct Job
     void *any_parameter;
 };
 
-struct CalculateDJ {
+struct CalculateDJ
+{
     Vector *pairs;
     double *b;
     int place;
 };
 
-struct CalculateAccuracy {
+struct CalculateAccuracy
+{
     Vector *pairs;
     double *b;
     int place;
@@ -100,7 +107,6 @@ void destroy_queue(Queue *q);
 void add(Queue *q, QueueNode *nn);
 int isempty(Queue *q);
 QueueNode *queue_pop(Queue *q); // !Used with queue mutex locked
-
 
 /**
  * @brief Train the model using all pairs of json files specified in datasetX_path.
