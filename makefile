@@ -28,6 +28,7 @@ SOURCE := $(shell find ./src -name '*.c' -not -name 'main.c')
 MAIN := 'src/main.c'
 UNITY := $(shell find ./test/Unity/src -name '*.c')
 TESTS := $(shell find ./test -name '*.c' -not -path '*Unity*')
+SHELL := /bin/bash
 
 .PHONY: usage
 usage:
@@ -72,7 +73,7 @@ cl: clobber
 
 .PHONY: run
 run: clean build
-	./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
+	time ./build/$(PROGRAM_NAME) -w $(DATASET_W) -x $(DATASET_X)
 .PHONY: r
 r: run
 

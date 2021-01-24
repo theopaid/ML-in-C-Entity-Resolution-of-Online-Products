@@ -480,7 +480,10 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         {
             dj[i] = 0.0;
         }
-        printf("==> Training weights times %d ...\n", count);
+
+        if (count % 50 == 0)
+            printf("==> Training weights times %d ...\n", count);
+
         JobScheduler *sch = scheduler_init(threads);
 
         for (int i = 1; i < times_inserted + 1; i++)
