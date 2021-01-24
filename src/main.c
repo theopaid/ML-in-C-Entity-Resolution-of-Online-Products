@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     puts(datasetX);
 
     //  1.  Analyze all Json in X and pairs in W to form Cliques. W+ is the new set with Clique relationships.
-    
+
     HashTable *hashTable = initHashTable(count_datafiles(datasetX));
     puts("==> Reading Dataset X ...");
     read_from_dir(datasetX, hashTable);
@@ -40,14 +40,14 @@ int main(int argc, char **argv)
     fclose(fptr_miss);
 
     //  2.  Get the 60% of W+ as the initial training set W1+, 20% as testing set T and 20% as validation set V
-    
+
     puts("==> Creating from W+ : Training, Evaluation and Test datasets ...");
     createPairDatasets(); //  result in global trainingSet_HTable, evaluationSet_HTable, testSet_HTable
 
     HashTable_gen *stopwordsHTable = saveStopwords("./Datasets/stopwords.csv");
-    
+
     //  3.  Calculate tf-idf and reduce dimensions to 1000 top words for each Json.
-       
+
     createTFIDFvectors(hashTable, stopwordsHTable);
     freeHashTable_gen(stopwordsHTable);
     //printTFIDFvectors(hashTable);
@@ -67,28 +67,32 @@ int main(int argc, char **argv)
     Vector *full_T_pairs = vectorize_all_pairs(hashTable, T);
     HashTable_w *V = getEvaluationSet();
     Vector *full_V_pairs = vectorize_all_pairs(hashTable, V);
-    
 
     double *b = train_weights(hashTable, W1, full_W_pairs);
+    //freeHashTable_w(W1);
     int threads = 10, batch_size = 1000;
     float threshold = 0.2;
 
     double acc = model_testing_testing(hashTable, full_T_pairs, b, threads, threshold, batch_size);
 
     puts("==> (*)=======================================(*)");
-    printf("==> (+) Model testing accuracy : [%f]%% \n", acc*100);
+    printf("==> (+) Model testing accuracy : [%f]%% \n", acc * 100);
     printf("==> (|) Threads : %d\n", threads);
     printf("==> (|) Batch size : %d\n", batch_size);
     printf("==> (|) Threshold : %f\n", threshold);
     puts("==> (*)=======================================(*)");
 
+
+    //freeHashTable_w(T);
     //  5.  We use these b values to validate the model and estimate the possibility (accuracy) of the model.
     //      This time we pass the pairs in the V set to the model and we use the threads to separate the V set in batches.
     //      We calculate the prediction of our model (using b) and check correnspondence with the actual values in V to find the accuracy.
+    freeVectorWithoutItems(full_W_pairs);
     freeVectorWithoutItems(full_T_pairs);
     acc = model_testing(hashTable, full_V_pairs, b);
-    printf("==> (+) Model validation accuracy : [%f]%% \n", acc*100);
-freeVectorWithoutItems(full_V_pairs);
+    printf("==> (+) Model validation accuracy : [%f]%% \n", acc * 100);
+    //freeHashTable_w(V);
+    freeVectorWithoutItems(full_V_pairs);
     freeHashTable(hashTable);
     free(b);
     clock_t end = clock();
