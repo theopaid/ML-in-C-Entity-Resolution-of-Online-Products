@@ -229,7 +229,9 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
         //puts("==> Calculating accuracy ... ");
 
         JobScheduler *sch = scheduler_init(_threads);
-        for (int i = 1; i < times_inserted + 1; i++)
+
+        for (int i = 1; i < times_inserted+1; i++)
+
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
             CalculateAccuracy *to_pass = (CalculateAccuracy *)safe_malloc(sizeof(CalculateAccuracy));
@@ -478,8 +480,10 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
         {
             dj[i] = 0.0;
         }
+
         if (count % 50 == 0)
             printf("==> Training weights times %d ...\n", count);
+
         JobScheduler *sch = scheduler_init(threads);
 
         for (int i = 1; i < times_inserted + 1; i++)
