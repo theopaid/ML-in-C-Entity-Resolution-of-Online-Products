@@ -72,6 +72,7 @@ int main(int argc, char **argv)
     double *b = train_weights(hashTable, W1, full_W_pairs);
     int threads = 10, batch_size = 1000;
     float threshold = 0.2;
+
     double acc = model_testing_testing(hashTable, full_T_pairs, b, threads, threshold, batch_size);
 
     puts("==> (*)=======================================(*)");
