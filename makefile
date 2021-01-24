@@ -61,7 +61,6 @@ b: build
 
 .PHONY: clean
 clean:
-
 	rm -rf *.o *.out *.out.dSYM tmp* ./output/*.txt
 
 .PHONY: ccd
