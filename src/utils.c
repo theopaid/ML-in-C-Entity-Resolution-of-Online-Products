@@ -102,7 +102,7 @@ void printInsights()
     printMatchesCount();
     printMissMatchesCount();
     //printVisitedSpecNodesCount();
-    printExecTime();
+    //printExecTime();
     puts(" ");
     puts("|==============================|");
 }

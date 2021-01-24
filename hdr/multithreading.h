@@ -9,7 +9,7 @@
 #define TEST_THREAD_NUM 10
 #define TEST_BATCH_SIZE 1000
 #define LEARNING_RATE 0.7
-#define THREADS_NUM 10
+#define THREADS_NUM 20
 #define BATCH_SIZE 1000
 #define NEW_PAIRS_SIZE 10000
 #define THRESHOLD_VALUE 0.3
@@ -18,7 +18,7 @@
 #define WEIGHTS_START_VAL 0.2
 #define TF_IDF_SIZE 1000
 #define E_VALUE 0.0000001
-#define WEIGHT_TR_NUM 300
+#define WEIGHT_TR_NUM 400
 
 
 #define ec_nzero(call, msg) {if ( (call) < 0 ) {perror(msg); exit(1);}}

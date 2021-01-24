@@ -4,7 +4,7 @@ double timeSpent;
 
 int main(int argc, char **argv)
 {
-    clock_t begin = clock();
+    //clock_t begin = clock();
 
     if (!validArgs(argc, argv))
     {
@@ -95,8 +95,8 @@ int main(int argc, char **argv)
     freeVectorWithoutItems(full_V_pairs);
     freeHashTable(hashTable);
     free(b);
-    clock_t end = clock();
-    timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+    //clock_t end = clock();
+    //timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
     printInsights();
     return 0;
 }
