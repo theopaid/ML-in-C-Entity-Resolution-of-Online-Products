@@ -15,13 +15,11 @@
 #define THRESHOLD_VALUE 0.06
 #define THRESHOLD_STEP 0.01
 
-
 #define THRESHOLD_SLOPE 1
 #define WEIGHTS_START_VAL 0.2
 #define TF_IDF_SIZE 1000
 #define E_VALUE 0.0000001
 #define WEIGHT_TR_NUM 300
-
 
 #define ec_nzero(call, msg) \
     {                       \
