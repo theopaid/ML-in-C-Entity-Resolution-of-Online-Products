@@ -52,7 +52,7 @@ JobScheduler *scheduler_init(int no_of_threads)
 {
     JobScheduler *scheduler = (JobScheduler *)safe_malloc(sizeof(JobScheduler));
     ec_nzero(pthread_mutex_init(&scheduler->mt, NULL), "failed mutex init");
-    ec_nzero(pthread_cond_init(&scheduler->cv, NULL), "failed cond init");
+    //ec_nzero(pthread_cond_init(&scheduler->cv, NULL), "failed cond init");
     ec_nzero(pthread_mutex_init(&scheduler->mtcv, NULL), "failed mutex init");
     ec_nzero(pthread_barrier_init(&scheduler->barrier, NULL, no_of_threads + 1), "failed barrier init");
     scheduler->q = initialize_queue();
@@ -60,7 +60,7 @@ JobScheduler *scheduler_init(int no_of_threads)
     scheduler->tids = (pthread_t *)safe_malloc(sizeof(pthread_t) * no_of_threads);
     scheduler->thread_args = (thread_args_t *)safe_malloc(sizeof(thread_args_t));
     scheduler->thread_args->q = scheduler->q;
-    scheduler->thread_args->cv = &(scheduler->cv);
+    //scheduler->thread_args->cv = &(scheduler->cv);
     scheduler->thread_args->mt = &(scheduler->mt);
     scheduler->thread_args->barrier = &(scheduler->barrier);
     for (int i = 0; i < no_of_threads; i++)
@@ -95,7 +95,7 @@ void scheduler_destroy(JobScheduler *sch)
     ec_nzero(pthread_barrier_destroy(&sch->barrier), "failed barrier destroy");
     ec_nzero(pthread_mutex_destroy(&sch->mt), "failed mutex destroy");
     ec_nzero(pthread_mutex_destroy(&sch->mtcv), "failed mutex destroy");
-    ec_nzero(pthread_cond_destroy(&sch->cv), "failed cond destroy");
+    //ec_nzero(pthread_cond_destroy(&sch->cv), "failed cond destroy");
 
     free(sch);
 }
@@ -363,6 +363,7 @@ double timeSpentTraining;
 
 double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pairs)
 {
+    srand(time(NULL));
     //clock_t train_start = clock();
     puts("==> Initiating model TRAINING ...");
     double *b = weight_array_init(TF_IDF_SIZE * 2); // init array based on tf-idfs size
@@ -392,6 +393,7 @@ double *train_weights(HashTable *hash_table, HashTable_w *W1, Vector *full_W_pai
             double px = p_logistic_function_full(new_pair_not_in_W, b);
             new_pair_not_in_W->isMatch = px;
             //printf("+++ ( %f ) --- %f \n", px, 1-threshold);
+            //printf("random pair: %s , %s : %f\n", new_pair_not_in_W->leftSpecId, new_pair_not_in_W->rightSpecId, new_pair_not_in_W->isMatch);
 
             if ((px < threshold) || (px > 1 - threshold))
 
@@ -638,7 +640,6 @@ double *weight_array_init(int size)
 
 Observation *get_pair_in_x_excl_set(HashTable *hash_table, HashTable_w *W1)
 {
-    srand(time(NULL));
     int count = 0;
 
     SpecInfo *randm_spc1;
