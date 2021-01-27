@@ -12,14 +12,14 @@
 #define THREADS_NUM 20
 #define BATCH_SIZE 1000
 #define NEW_PAIRS_SIZE 10000
-#define THRESHOLD_VALUE 0.06
+#define THRESHOLD_VALUE 0.01
 #define THRESHOLD_STEP 0.01
 
 #define THRESHOLD_SLOPE 1
-#define WEIGHTS_START_VAL 0.2
+#define WEIGHTS_START_VAL 0.15
 #define TF_IDF_SIZE 1000
 #define E_VALUE 0.0000001
-#define WEIGHT_TR_NUM 300
+#define WEIGHT_TR_NUM 200
 
 #define ec_nzero(call, msg) \
     {                       \
@@ -47,8 +47,8 @@ struct JobScheduler
     int threads;
     Queue *q;
     pthread_t *tids;
-    pthread_mutex_t mtcv;      // mutex for finish
-    pthread_cond_t cv;         // threads have finished
+    pthread_mutex_t mtcv; // mutex for finish
+    //pthread_cond_t cv;         // threads have finished
     pthread_mutex_t mt;        // queue lock mutex
     pthread_barrier_t barrier; // thread barrier for simultaneous execution
     thread_args_t *thread_args;
@@ -58,7 +58,7 @@ struct thread_args
 {
     pthread_mutex_t *mt;
     pthread_mutex_t *mtcv;
-    pthread_cond_t *cv;
+    //pthread_cond_t *cv;
     pthread_barrier_t *barrier;
     Queue *q;
 };
