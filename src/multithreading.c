@@ -28,7 +28,8 @@ void *thread_func(void *arg)
         {
             pthread_mutex_unlock(((thread_args_t *)arg)->mt);
             //printf("block on cv: %d\n", ((thread_args_t*)arg)->cv);
-            pthread_cond_signal(((thread_args_t *)arg)->cv);
+            //pthread_cond_signal(((thread_args_t *)arg)->cv);
+            pthread_barrier_wait(((thread_args_t *)arg)->barrier);
             break;
         }
 
@@ -106,9 +107,10 @@ void scheduler_execute_all(JobScheduler *sch)
 
 void scheduler_wait_finish(JobScheduler *sch)
 {
-    pthread_mutex_lock(&sch->mtcv);
-    pthread_cond_wait(&sch->cv, &sch->mtcv);
-    pthread_mutex_unlock(&sch->mtcv);
+    pthread_barrier_wait(&sch->barrier);
+    // pthread_mutex_lock(&sch->mtcv);
+    // pthread_cond_wait(&sch->cv, &sch->mtcv);
+    // pthread_mutex_unlock(&sch->mtcv);
 }
 
 Queue *initialize_queue()
@@ -200,11 +202,11 @@ void calculate_accuracy(void *param)
 
     int position = ((CalculateAccuracy *)param)->i;
     pthread_mutex_lock(&acc_access);
-    if ( testAccuracy[position] > 0.0) testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits+no_hits))/2.0;
-    else testAccuracy[position] = (hits) / ((double)hits + no_hits);
+    if (testAccuracy[position] > 0.0)
+        testAccuracy[position] = (testAccuracy[position] + (hits) / ((double)hits + no_hits)) / 2.0;
+    else
+        testAccuracy[position] = (hits) / ((double)hits + no_hits);
     pthread_mutex_unlock(&acc_access);
-
-
 }
 
 double timeSpentTesting;
@@ -257,6 +259,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
             new_job->any_parameter = to_pass;
             scheduler_submit_job(sch, new_job);
         }
+
         scheduler_execute_all(sch);
         scheduler_wait_finish(sch);
         threshold += THRESHOLD_STEP * THRESHOLD_SLOPE;
@@ -281,6 +284,7 @@ double model_testing_testing(HashTable *hash_table, Vector *full_T_pairs, double
     return accuracy;
 }
 
+// VALIDATION NOT TESTING
 double model_testing(HashTable *hash_table, Vector *full_V_pairs, double *b)
 {
     pthread_mutex_init(&acc_access, NULL);
@@ -518,7 +522,7 @@ double *thrd_model_training_wghts(Vector *pairs, double *b, int threads)
 
         JobScheduler *sch = scheduler_init(threads);
 
-        for (int i = 1; i < times_inserted+1; i++)
+        for (int i = 1; i < times_inserted + 1; i++)
 
         {
             Job *new_job = (Job *)safe_malloc(sizeof(Job));
